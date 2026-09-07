@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YieldROI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <header class="main-header">
+
+        <div class="logo-area">
+
+            <div class="logo-mark">
+                🌿
+            </div>
+
+            <div>
+                <div class="logo-name">YieldROI</div>
+
+                <div class="logo-tagline">
+                    <span class="language-en">
+                        Smart Agriculture
+                    </span>
+
+                    <span class="language-ta">
+                        நுண்ணறிவு வேளாண்மை
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="language-switch"
+            id="languageSwitch"
+            onclick="toggleLanguage()">
+
+            தமிழ்
+
+        </button>
+
+    </header>
+
+
+    <!-- =====================================================
+         HERO SECTION
+         ===================================================== -->
+
+    <section class="hero-section">
+
+        <div class="hero-content">
+
+            <div class="hero-small-title">
+                <span class="language-en">
+                    INTELLIGENT CROP ANALYSIS
+                </span>
+
+                <span class="language-ta">
+                    நுண்ணறிவு பயிர் பகுப்பாய்வு
+                </span>
+            </div>
+
+
+            <h1>
+
+                <span class="language-en">
+                    Better decisions.<br>
+                    Better farming.
+                </span>
+
+                <span class="language-ta">
+                    சிறந்த முடிவுகள்.<br>
+                    சிறந்த விவசாயம்.
+                </span>
+
+            </h1>
+
+
+            <p class="hero-description">
+
+                <span class="language-en">
+                    Predict your crop yield, compare it with official
+                    benchmarks and understand the economic outcome.
+                </span>
+
+                <span class="language-ta">
+                    உங்கள் பயிர் மகசூலைக் கணித்து,
+                    அதிகாரப்பூர்வ அளவுகோலுடன் ஒப்பிட்டு,
+                    பொருளாதார முடிவை அறிந்து கொள்ளுங்கள்.
+                </span>
+
+            </p>
+
+        </div>
+
+
+        <!-- Agriculture artwork -->
+
+        <div class="hero-art">
+
+            <div class="sun"></div>
+
+            <div class="hill hill-back"></div>
+
+            <div class="hill hill-middle"></div>
+
+            <div class="field field-one"></div>
+
+            <div class="field field-two"></div>
+
+            <div class="field field-three"></div>
+
+
+            <div class="farm-house">
+
+                <div class="house-body"></div>
+
+                <div class="house-roof"></div>
+
+                <div class="house-door"></div>
+
+                <div class="house-window"></div>
+
+            </div>
+
+
+            <div class="tree tree-one">
+                <span></span>
+            </div>
+
+            <div class="tree tree-two">
+                <span></span>
+            </div>
+
+
+            <div class="fence">
+
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+
+            </div>
+
+        </div>
+
+
+        <!-- Scroll arrow -->
+
+        <button
+            class="hero-arrow"
+            type="button"
+            onclick="scrollToPrediction()"
+            aria-label="Go to prediction form">
+
+            <span>↓</span>
+
+        </button>
+
+    </section>
+
+
+    <!-- =====================================================
+         PREDICTION SECTION
+         ===================================================== -->
+
+    <section
+        class="prediction-section"
+        id="predictionSection">
+
+        <div class="prediction-wrapper">
+
+
+            <!-- Heading -->
+
+            <div class="prediction-heading">
+
+                <div class="section-kicker">
+
+                    <span class="language-en">
+                        START YOUR ANALYSIS
+                    </span>
+
+                    <span class="language-ta">
+                        உங்கள் பகுப்பாய்வைத் தொடங்குங்கள்
+                    </span>
+
+                </div>
+
+
+                <h2>
+
+                    <span class="language-en">
+                        Tell us about your crop
+                    </span>
+
+                    <span class="language-ta">
+                        உங்கள் பயிரைப் பற்றி தெரிவிக்கவும்
+                    </span>
+
+                </h2>
+
+
+                <p>
+
+                    <span class="language-en">
+                        Enter the details below to generate your
+                        yield and economic analysis.
+                    </span>
+
+                    <span class="language-ta">
+                        உங்கள் மகசூல் மற்றும் பொருளாதார பகுப்பாய்வைப்
+                        பெற கீழே உள்ள விவரங்களை உள்ளிடவும்.
+                    </span>
+
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 FORM CARD
+                 ================================================= -->
+
+            <form
+                id="predictionForm"
+                class="prediction-card">
+
+
+                <!-- District -->
+
+                <div class="form-group">
+
+                    <label for="district">
+
+                        <span class="language-en">
+                            District
+                        </span>
+
+                        <span class="language-ta">
+                            மாவட்டம்
+                        </span>
+
+                    </label>
+
+
+                    <div class="select-wrapper">
+
+                        <select
+                            id="district"
+                            name="district"
+                            required>
+
+                            <option
+                                value=""
+                                disabled
+                                selected>
+
+                                Select District
+
+                            </option>
+
+
+                            {% for district in districts %}
+
+                            <option value="{{ district }}">
+
+                                {{ district }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Crop -->
+
+                <div class="form-group">
+
+                    <label for="crop">
+
+                        <span class="language-en">
+                            Crop
+                        </span>
+
+                        <span class="language-ta">
+                            பயிர்
+                        </span>
+
+                    </label>
+
+
+                    <div class="select-wrapper">
+
+                        <select
+                            id="crop"
+                            name="crop"
+                            required>
+
+                            <option
+                                value=""
+                                disabled
+                                selected>
+
+                                Select Crop
+
+                            </option>
+
+
+                            {% for crop in crops %}
+
+                            <option value="{{ crop }}">
+
+                                {{ crop }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Season -->
+
+                <div class="form-group">
+
+                    <label for="season">
+
+                        <span class="language-en">
+                            Season
+                        </span>
+
+                        <span class="language-ta">
+                            பருவம்
+                        </span>
+
+                    </label>
+
+
+                    <div class="select-wrapper">
+
+                        <select
+                            id="season"
+                            name="season"
+                            required>
+
+                            <option
+                                value=""
+                                disabled
+                                selected>
+
+                                Select Season
+
+                            </option>
+
+
+                            {% for season in seasons %}
+
+                            <option value="{{ season }}">
+
+                                {{ season }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Year -->
+
+                <div class="form-group">
+
+                    <label for="year">
+
+                        <span class="language-en">
+                            Year
+                        </span>
+
+                        <span class="language-ta">
+                            ஆண்டு
+                        </span>
+
+                    </label>
+
+
+                    <div class="select-wrapper">
+
+                        <select
+                            id="year"
+                            name="year"
+                            required>
+
+                            <option
+                                value=""
+                                disabled
+                                selected>
+
+                                Select Year
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Area -->
+
+                <div class="form-group area-group">
+
+                    <label for="area">
+
+                        <span class="language-en">
+                            Area
+                        </span>
+
+                        <span class="language-ta">
+                            பரப்பளவு
+                        </span>
+
+                    </label>
+
+
+                    <div class="area-input-wrapper">
+
+                        <input
+                            type="number"
+                            id="area"
+                            name="area"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Enter area"
+                            required>
+
+                        <span class="area-unit">
+                            ha
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Submit -->
+
+                <div class="form-submit">
+
+                    <button
+                        type="submit"
+                        class="predict-button"
+                        id="predictButton">
+
+                        <span class="button-text language-en">
+                            Predict & Analyze
+                        </span>
+
+                        <span class="button-text language-ta">
+                            கணித்து பகுப்பாய்வு செய்க
+                        </span>
+
+                        <span
+                            class="loading-text language-en">
+                            Analyzing...
+                        </span>
+
+                        <span
+                            class="loading-text language-ta">
+                            பகுப்பாய்வு செய்யப்படுகிறது...
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- Error -->
+
+                <div
+                    id="formError"
+                    class="form-error">
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SIMPLE FOOTER
+         ===================================================== -->
+
+    <footer class="simple-footer">
+
+        <span class="language-en">
+            YieldROI • Intelligent Agriculture Decision Support
+        </span>
+
+        <span class="language-ta">
+            YieldROI • நுண்ணறிவு வேளாண்மை முடிவு ஆதரவு
+        </span>
+
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

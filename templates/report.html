@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YieldROI - Report</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="report-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="site-header report-header">
+
+        <div class="brand">
+            <div class="brand-icon">Y</div>
+
+            <div>
+                <div class="brand-name">YieldROI</div>
+                <div class="brand-subtitle">
+                    Smart Agriculture Decision Support
+                </div>
+            </div>
+        </div>
+
+        <div class="report-actions">
+
+            <button
+                type="button"
+                class="language-button"
+                id="languageSwitch"
+                onclick="toggleLanguage()">
+                தமிழ்
+            </button>
+
+            <button
+                type="button"
+                class="secondary-button"
+                onclick="window.print()">
+
+                <span class="language-en">Print Report</span>
+                <span class="language-ta">அறிக்கையை அச்சிடு</span>
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN REPORT
+         ===================================================== -->
+
+    <main class="report-container">
+
+        <!-- Report Title -->
+
+        <section class="report-title-section">
+
+            <div>
+                <p class="eyebrow">
+                    <span class="language-en">YieldROI Analysis</span>
+                    <span class="language-ta">YieldROI பகுப்பாய்வு</span>
+                </p>
+
+                <h1>
+                    <span class="language-en">
+                        Crop Prediction Report
+                    </span>
+
+                    <span class="language-ta">
+                        பயிர் கணிப்பு அறிக்கை
+                    </span>
+                </h1>
+
+                <p class="report-date" id="reportGeneratedDate"></p>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             QUICK SUMMARY
+             ================================================= -->
+
+        <section class="report-summary-card">
+
+            <div class="summary-item">
+
+                <span class="summary-label">
+                    <span class="language-en">Predicted Yield</span>
+                    <span class="language-ta">கணிக்கப்பட்ட மகசூல்</span>
+                </span>
+
+                <strong id="reportPredictedYield">
+                    --
+                </strong>
+
+                <small>
+                    tonnes / hectare
+                </small>
+
+            </div>
+
+
+            <div class="summary-item">
+
+                <span class="summary-label">
+                    <span class="language-en">Benchmark Status</span>
+                    <span class="language-ta">
+                        அளவுகோல் நிலை
+                    </span>
+                </span>
+
+                <strong id="reportBenchmarkStatus">
+                    --
+                </strong>
+
+            </div>
+
+
+            <div class="summary-item">
+
+                <span class="summary-label">
+                    <span class="language-en">ROI</span>
+                    <span class="language-ta">
+                        முதலீட்டு வருமானம்
+                    </span>
+                </span>
+
+                <strong id="reportROI">
+                    --
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             1. INPUT DETAILS
+             ================================================= -->
+
+        <section class="report-section">
+
+            <div class="section-heading">
+
+                <span class="section-number">01</span>
+
+                <div>
+                    <h2>
+                        <span class="language-en">
+                            Input Details
+                        </span>
+
+                        <span class="language-ta">
+                            உள்ளீட்டு விவரங்கள்
+                        </span>
+                    </h2>
+
+                    <p>
+                        <span class="language-en">
+                            Details used for generating the prediction.
+                        </span>
+
+                        <span class="language-ta">
+                            கணிப்பை உருவாக்க பயன்படுத்தப்பட்ட விவரங்கள்.
+                        </span>
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="details-grid">
+
+                <div class="detail-box">
+
+                    <span class="detail-label">
+                        <span class="language-en">District</span>
+                        <span class="language-ta">மாவட்டம்</span>
+                    </span>
+
+                    <strong id="reportDistrict">--</strong>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="detail-label">
+                        <span class="language-en">Crop</span>
+                        <span class="language-ta">பயிர்</span>
+                    </span>
+
+                    <strong id="reportCrop">--</strong>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="detail-label">
+                        <span class="language-en">Season</span>
+                        <span class="language-ta">பருவம்</span>
+                    </span>
+
+                    <strong id="reportSeason">--</strong>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="detail-label">
+                        <span class="language-en">Year</span>
+                        <span class="language-ta">ஆண்டு</span>
+                    </span>
+
+                    <strong id="reportYear">--</strong>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="detail-label">
+                        <span class="language-en">Area</span>
+                        <span class="language-ta">பரப்பளவு</span>
+                    </span>
+
+                    <strong id="reportArea">--</strong>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="detail-label">
+                        <span class="language-en">Total Production</span>
+                        <span class="language-ta">
+                            மொத்த உற்பத்தி
+                        </span>
+                    </span>
+
+                    <strong id="reportProduction">--</strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             2. PREDICTION RESULT
+             ================================================= -->
+
+        <section class="report-section">
+
+            <div class="section-heading">
+
+                <span class="section-number">02</span>
+
+                <div>
+                    <h2>
+                        <span class="language-en">
+                            Prediction Result
+                        </span>
+
+                        <span class="language-ta">
+                            கணிப்பு முடிவு
+                        </span>
+                    </h2>
+
+                    <p>
+                        <span class="language-en">
+                            Yield predicted by the trained machine learning model.
+                        </span>
+
+                        <span class="language-ta">
+                            பயிற்சி பெற்ற இயந்திரக் கற்றல் மாதிரி கணித்த மகசூல்.
+                        </span>
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="prediction-report-card">
+
+                <div class="prediction-main">
+
+                    <span>
+                        <span class="language-en">
+                            Predicted Yield
+                        </span>
+
+                        <span class="language-ta">
+                            கணிக்கப்பட்ட மகசூல்
+                        </span>
+                    </span>
+
+                    <strong id="reportPredictionLarge">
+                        --
+                    </strong>
+
+                    <small>
+                        tonnes / hectare
+                    </small>
+
+                </div>
+
+
+                <div class="prediction-production">
+
+                    <span>
+                        <span class="language-en">
+                            Estimated Total Production
+                        </span>
+
+                        <span class="language-ta">
+                            மதிப்பிடப்பட்ட மொத்த உற்பத்தி
+                        </span>
+                    </span>
+
+                    <strong id="reportProductionLarge">
+                        --
+                    </strong>
+
+                    <small>
+                        tonnes
+                    </small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             3. OFFICIAL BENCHMARK
+             ================================================= -->
+
+        <section class="report-section">
+
+            <div class="section-heading">
+
+                <span class="section-number">03</span>
+
+                <div>
+
+                    <h2>
+                        <span class="language-en">
+                            Official Benchmark Comparison
+                        </span>
+
+                        <span class="language-ta">
+                            அதிகாரப்பூர்வ அளவுகோல் ஒப்பீடு
+                        </span>
+                    </h2>
+
+                    <p>
+                        <span class="language-en">
+                            Comparison with the official Tamil Nadu 2024-25 yield benchmark.
+                        </span>
+
+                        <span class="language-ta">
+                            தமிழ்நாடு 2024-25 அதிகாரப்பூர்வ மகசூல் அளவுகோலுடன் ஒப்பீடு.
+                        </span>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="benchmark-report-card"
+                id="benchmarkReportCard">
+
+                <div class="benchmark-status">
+
+                    <span class="benchmark-status-label">
+                        <span class="language-en">
+                            Performance
+                        </span>
+
+                        <span class="language-ta">
+                            செயல்திறன்
+                        </span>
+                    </span>
+
+                    <strong id="reportBenchmarkStatusLarge">
+                        --
+                    </strong>
+
+                </div>
+
+
+                <div class="benchmark-grid">
+
+                    <div>
+
+                        <span>
+                            <span class="language-en">
+                                Predicted Yield
+                            </span>
+
+                            <span class="language-ta">
+                                கணிக்கப்பட்ட மகசூல்
+                            </span>
+                        </span>
+
+                        <strong id="reportBenchmarkPredicted">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            <span class="language-en">
+                                Official Benchmark
+                            </span>
+
+                            <span class="language-ta">
+                                அதிகாரப்பூர்வ அளவுகோல்
+                            </span>
+                        </span>
+
+                        <strong id="reportBenchmarkOfficial">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            <span class="language-en">
+                                Difference
+                            </span>
+
+                            <span class="language-ta">
+                                வேறுபாடு
+                            </span>
+                        </span>
+
+                        <strong id="reportBenchmarkDifference">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            <span class="language-en">
+                                Percentage Difference
+                            </span>
+
+                            <span class="language-ta">
+                                சதவீத வேறுபாடு
+                            </span>
+                        </span>
+
+                        <strong id="reportBenchmarkPercentage">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    class="benchmark-message"
+                    id="reportBenchmarkMessage">
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             4. ECONOMIC ANALYSIS
+             ================================================= -->
+
+        <section class="report-section">
+
+            <div class="section-heading">
+
+                <span class="section-number">04</span>
+
+                <div>
+
+                    <h2>
+                        <span class="language-en">
+                            Economic Analysis
+                        </span>
+
+                        <span class="language-ta">
+                            பொருளாதார பகுப்பாய்வு
+                        </span>
+                    </h2>
+
+                    <p>
+                        <span class="language-en">
+                            Scenario-based estimation using the predicted yield,
+                            reference price and cultivation cost.
+                        </span>
+
+                        <span class="language-ta">
+                            கணிக்கப்பட்ட மகசூல், குறிப்பு விலை மற்றும்
+                            சாகுபடி செலவை அடிப்படையாகக் கொண்ட மதிப்பீடு.
+                        </span>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="economic-grid">
+
+                <div class="economic-box">
+
+                    <span>
+                        <span class="language-en">
+                            Cost / Hectare
+                        </span>
+
+                        <span class="language-ta">
+                            ஹெக்டேருக்கான செலவு
+                        </span>
+                    </span>
+
+                    <strong id="reportCostPerHectare">
+                        ₹--
+                    </strong>
+
+                </div>
+
+
+                <div class="economic-box">
+
+                    <span>
+                        <span class="language-en">
+                            Total Cost
+                        </span>
+
+                        <span class="language-ta">
+                            மொத்த செலவு
+                        </span>
+                    </span>
+
+                    <strong id="reportTotalCost">
+                        ₹--
+                    </strong>
+
+                </div>
+
+
+                <div class="economic-box">
+
+                    <span>
+                        <span class="language-en">
+                            Reference Price
+                        </span>
+
+                        <span class="language-ta">
+                            குறிப்பு விலை
+                        </span>
+                    </span>
+
+                    <strong id="reportPrice">
+                        ₹--
+                    </strong>
+
+                    <small>
+                        / tonne
+                    </small>
+
+                </div>
+
+
+                <div class="economic-box">
+
+                    <span>
+                        <span class="language-en">
+                            Estimated Revenue
+                        </span>
+
+                        <span class="language-ta">
+                            மதிப்பிடப்பட்ட வருவாய்
+                        </span>
+                    </span>
+
+                    <strong id="reportRevenue">
+                        ₹--
+                    </strong>
+
+                </div>
+
+
+                <div class="economic-box">
+
+                    <span>
+                        <span class="language-en">
+                            Estimated Profit / Loss
+                        </span>
+
+                        <span class="language-ta">
+                            மதிப்பிடப்பட்ட லாபம் / இழப்பு
+                        </span>
+                    </span>
+
+                    <strong id="reportProfit">
+                        ₹--
+                    </strong>
+
+                </div>
+
+
+                <div class="economic-box highlight-box">
+
+                    <span>
+                        <span class="language-en">
+                            ROI
+                        </span>
+
+                        <span class="language-ta">
+                            முதலீட்டு வருமானம்
+                        </span>
+                    </span>
+
+                    <strong id="reportROILarge">
+                        --%
+                    </strong>
+
+                    <small id="reportROIStatus">
+                        --
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="economic-note">
+
+                <strong>
+                    <span class="language-en">
+                        Important:
+                    </span>
+
+                    <span class="language-ta">
+                        முக்கியம்:
+                    </span>
+                </strong>
+
+                <span class="language-en">
+                    ROI is a scenario-based estimate using the project's
+                    reference cultivation costs and reference prices.
+                    It should not be interpreted as guaranteed farm profit.
+                </span>
+
+                <span class="language-ta">
+                    ROI என்பது திட்டத்தில் பயன்படுத்தப்பட்ட குறிப்பு
+                    சாகுபடி செலவு மற்றும் விலையை அடிப்படையாகக் கொண்ட
+                    மதிப்பீடு ஆகும். இது உறுதியான பண்ணை லாபமாக கருதப்படக்கூடாது.
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             5. FERTILIZER RECOMMENDATION
+             ================================================= -->
+
+        <section class="report-section">
+
+            <div class="section-heading">
+
+                <span class="section-number">05</span>
+
+                <div>
+
+                    <h2>
+                        <span class="language-en">
+                            Fertilizer Recommendation
+                        </span>
+
+                        <span class="language-ta">
+                            உர பரிந்துரை
+                        </span>
+                    </h2>
+
+                    <p>
+                        <span class="language-en">
+                            Recommendation based on the project's
+                            soil information and authoritative fertilizer rules.
+                        </span>
+
+                        <span class="language-ta">
+                            திட்டத்தின் மண் தகவல்கள் மற்றும் அதிகாரப்பூர்வ
+                            உர விதிகளின் அடிப்படையிலான பரிந்துரை.
+                        </span>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="fertilizer-report-card"
+                id="fertilizerReportCard">
+
+                <div class="fertilizer-status">
+                    <strong id="reportFertilizerMessage">
+                        Loading...
+                    </strong>
+                </div>
+
+
+                <div
+                    class="fertilizer-values"
+                    id="reportFertilizerValues">
+
+                    <div class="fertilizer-value">
+
+                        <span>N</span>
+
+                        <strong id="reportNitrogen">
+                            --
+                        </strong>
+
+                        <small>kg/ha</small>
+
+                    </div>
+
+
+                    <div class="fertilizer-value">
+
+                        <span>P₂O₅</span>
+
+                        <strong id="reportPhosphorus">
+                            --
+                        </strong>
+
+                        <small>kg/ha</small>
+
+                    </div>
+
+
+                    <div class="fertilizer-value">
+
+                        <span>K₂O</span>
+
+                        <strong id="reportPotassium">
+                            --
+                        </strong>
+
+                        <small>kg/ha</small>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="soil-summary"
+                    id="reportSoilSummary">
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REPORT FOOTER
+             ================================================= -->
+
+        <section class="report-footer">
+
+            <div class="footer-line"></div>
+
+            <p>
+
+                <strong>YieldROI</strong>
+
+                <br>
+
+                <span class="language-en">
+                    Intelligent Crop Forecasting, Yield Prediction
+                    and Smart Fertilizer Recommendation
+                </span>
+
+                <span class="language-ta">
+                    நுண்ணறிவு பயிர் முன்னறிவிப்பு, மகசூல் கணிப்பு
+                    மற்றும் ஸ்மார்ட் உர பரிந்துரை
+                </span>
+
+            </p>
+
+            <p class="footer-disclaimer">
+
+                <span class="language-en">
+                    This report is generated by the YieldROI decision-support
+                    system and is intended for analytical and educational use.
+                </span>
+
+                <span class="language-ta">
+                    இந்த அறிக்கை YieldROI முடிவு ஆதரவு அமைப்பால் உருவாக்கப்பட்டது.
+                    இது பகுப்பாய்வு மற்றும் கல்வி பயன்பாட்டிற்காக மட்டுமே.
+                </span>
+
+            </p>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         REPORT SCRIPT
+         ===================================================== -->
+
+    <script>
+
+        let currentLanguage = "en";
+
+
+        // -----------------------------------------------------
+        // LANGUAGE SWITCH
+        // -----------------------------------------------------
+
+        function toggleLanguage() {
+
+            currentLanguage =
+                currentLanguage === "en"
+                    ? "ta"
+                    : "en";
+
+            document.body.classList.toggle(
+                "tamil-mode",
+                currentLanguage === "ta"
+            );
+
+            const button =
+                document.getElementById(
+                    "languageSwitch"
+                );
+
+            if (button) {
+
+                button.textContent =
+                    currentLanguage === "en"
+                        ? "தமிழ்"
+                        : "English";
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // FORMATTERS
+        // -----------------------------------------------------
+
+        function formatNumber(
+            value,
+            decimals = 2
+        ) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return "--";
+            }
+
+            const number =
+                Number(value);
+
+            if (Number.isNaN(number)) {
+                return "--";
+            }
+
+            return number.toLocaleString(
+                "en-IN",
+                {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                }
+            );
+        }
+
+
+        function formatCurrency(value) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return "₹--";
+            }
+
+            const number =
+                Number(value);
+
+            if (Number.isNaN(number)) {
+                return "₹--";
+            }
+
+            return "₹" +
+                number.toLocaleString(
+                    "en-IN",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                );
+        }
+
+
+        // -----------------------------------------------------
+        // GET REPORT DATA
+        // -----------------------------------------------------
+
+        function getReportData() {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const encodedData =
+                params.get("data");
+
+            if (!encodedData) {
+                return null;
+            }
+
+            try {
+
+                return JSON.parse(
+                    decodeURIComponent(
+                        encodedData
+                    )
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Could not read report data:",
+                    error
+                );
+
+                return null;
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // DISPLAY REPORT
+        // -----------------------------------------------------
+
+        function populateReport() {
+
+            const result =
+                getReportData();
+
+            if (!result) {
+
+                document.getElementById(
+                    "reportBenchmarkMessage"
+                ).textContent =
+                    "Report data could not be loaded.";
+
+                return;
+            }
+
+
+            const input =
+                result.input || {};
+
+            const prediction =
+                result.prediction || {};
+
+            const benchmark =
+                result.benchmark || {};
+
+            const roi =
+                result.roi || {};
+
+            const fertilizer =
+                result.fertilizer || {};
+
+
+            // -------------------------------------------------
+            // INPUT
+            // -------------------------------------------------
+
+            document.getElementById(
+                "reportDistrict"
+            ).textContent =
+                input.district || "--";
+
+
+            document.getElementById(
+                "reportCrop"
+            ).textContent =
+                input.crop || "--";
+
+
+            document.getElementById(
+                "reportSeason"
+            ).textContent =
+                input.season || "--";
+
+
+            document.getElementById(
+                "reportYear"
+            ).textContent =
+                input.year || "--";
+
+
+            document.getElementById(
+                "reportArea"
+            ).textContent =
+                formatNumber(
+                    input.area,
+                    2
+                ) + " ha";
+
+
+            // -------------------------------------------------
+            // PREDICTION
+            // -------------------------------------------------
+
+            const predictedYield =
+                prediction.yield_tonnes_per_hectare;
+
+
+            const totalProduction =
+                prediction.total_production_tonnes;
+
+
+            document.getElementById(
+                "reportPredictedYield"
+            ).textContent =
+                formatNumber(
+                    predictedYield,
+                    3
+                );
+
+
+            document.getElementById(
+                "reportPredictionLarge"
+            ).textContent =
+                formatNumber(
+                    predictedYield,
+                    3
+                );
+
+
+            document.getElementById(
+                "reportProduction"
+            ).textContent =
+                formatNumber(
+                    totalProduction,
+                    3
+                ) + " tonnes";
+
+
+            document.getElementById(
+                "reportProductionLarge"
+            ).textContent =
+                formatNumber(
+                    totalProduction,
+                    3
+                );
+
+
+            // -------------------------------------------------
+            // BENCHMARK
+            // -------------------------------------------------
+
+            if (benchmark.available) {
+
+                const status =
+                    benchmark.status || "Near benchmark";
+
+
+                document.getElementById(
+                    "reportBenchmarkStatus"
+                ).textContent =
+                    status;
+
+
+                document.getElementById(
+                    "reportBenchmarkStatusLarge"
+                ).textContent =
+                    status;
+
+
+                document.getElementById(
+                    "reportBenchmarkPredicted"
+                ).textContent =
+                    formatNumber(
+                        benchmark.predicted_yield,
+                        3
+                    ) + " tonnes/ha";
+
+
+                document.getElementById(
+                    "reportBenchmarkOfficial"
+                ).textContent =
+                    formatNumber(
+                        benchmark.benchmark_yield,
+                        3
+                    ) + " tonnes/ha";
+
+
+                const difference =
+                    Number(
+                        benchmark.difference
+                    );
+
+
+                document.getElementById(
+                    "reportBenchmarkDifference"
+                ).textContent =
+                    (difference >= 0 ? "+" : "") +
+                    formatNumber(
+                        difference,
+                        3
+                    ) +
+                    " tonnes/ha";
+
+
+                const percentage =
+                    Number(
+                        benchmark.percentage_difference
+                    );
+
+
+                document.getElementById(
+                    "reportBenchmarkPercentage"
+                ).textContent =
+                    (percentage >= 0 ? "+" : "") +
+                    formatNumber(
+                        percentage,
+                        2
+                    ) +
+                    "%";
+
+
+                document.getElementById(
+                    "reportBenchmarkMessage"
+                ).textContent =
+                    "Official benchmark year: " +
+                    (
+                        benchmark.year ||
+                        "2024-25"
+                    );
+
+            } else {
+
+                document.getElementById(
+                    "reportBenchmarkStatus"
+                ).textContent =
+                    "Unavailable";
+
+
+                document.getElementById(
+                    "reportBenchmarkStatusLarge"
+                ).textContent =
+                    "Unavailable";
+
+
+                document.getElementById(
+                    "reportBenchmarkMessage"
+                ).textContent =
+                    benchmark.message ||
+                    "Official benchmark comparison is not available for this crop.";
+
+            }
+
+
+            // -------------------------------------------------
+            // ROI
+            // -------------------------------------------------
+
+            if (roi.available) {
+
+                document.getElementById(
+                    "reportROI"
+                ).textContent =
+                    formatNumber(
+                        roi.roi_percentage,
+                        2
+                    ) + "%";
+
+
+                document.getElementById(
+                    "reportROILarge"
+                ).textContent =
+                    formatNumber(
+                        roi.roi_percentage,
+                        2
+                    ) + "%";
+
+
+                document.getElementById(
+                    "reportCostPerHectare"
+                ).textContent =
+                    formatCurrency(
+                        roi.cost_per_hectare
+                    );
+
+
+                document.getElementById(
+                    "reportTotalCost"
+                ).textContent =
+                    formatCurrency(
+                        roi.total_cost
+                    );
+
+
+                document.getElementById(
+                    "reportPrice"
+                ).textContent =
+                    formatCurrency(
+                        roi.price_per_tonne
+                    );
+
+
+                document.getElementById(
+                    "reportRevenue"
+                ).textContent =
+                    formatCurrency(
+                        roi.revenue
+                    );
+
+
+                document.getElementById(
+                    "reportProfit"
+                ).textContent =
+                    formatCurrency(
+                        roi.profit
+                    );
+
+
+                document.getElementById(
+                    "reportROIStatus"
+                ).textContent =
+                    roi.status || "--";
+
+            } else {
+
+                document.getElementById(
+                    "reportROI"
+                ).textContent =
+                    "Unavailable";
+
+
+                document.getElementById(
+                    "reportROILarge"
+                ).textContent =
+                    "Unavailable";
+
+
+                document.getElementById(
+                    "reportROIStatus"
+                ).textContent =
+                    roi.message || "";
+
+            }
+
+
+            // -------------------------------------------------
+            // FERTILIZER
+            // -------------------------------------------------
+
+            populateFertilizer(
+                fertilizer
+            );
+
+
+            // -------------------------------------------------
+            // GENERATED DATE
+            // -------------------------------------------------
+
+            const now =
+                new Date();
+
+            document.getElementById(
+                "reportGeneratedDate"
+            ).textContent =
+                "Generated on " +
+                now.toLocaleDateString(
+                    "en-IN",
+                    {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric"
+                    }
+                );
+        }
+
+
+        // -----------------------------------------------------
+        // FERTILIZER DISPLAY
+        // -----------------------------------------------------
+
+        function populateFertilizer(
+            fertilizer
+        ) {
+
+            const message =
+                document.getElementById(
+                    "reportFertilizerMessage"
+                );
+
+
+            const values =
+                document.getElementById(
+                    "reportFertilizerValues"
+                );
+
+
+            if (
+                !fertilizer ||
+                fertilizer.available === false
+            ) {
+
+                message.textContent =
+                    fertilizer.message ||
+                    "Fertilizer recommendation is not available.";
+
+                values.style.display =
+                    "none";
+
+                return;
+            }
+
+
+            message.textContent =
+                fertilizer.message ||
+                fertilizer.explanation ||
+                fertilizer.source ||
+                "Recommendation generated from the fertilizer knowledge base.";
+
+
+            const n =
+                fertilizer.n ??
+                fertilizer.N ??
+                fertilizer.nitrogen;
+
+
+            const p =
+                fertilizer.p2o5 ??
+                fertilizer.P2O5 ??
+                fertilizer.phosphorus;
+
+
+            const k =
+                fertilizer.k2o ??
+                fertilizer.K2O ??
+                fertilizer.potassium;
+
+
+            document.getElementById(
+                "reportNitrogen"
+            ).textContent =
+                n !== undefined
+                    ? formatNumber(n, 1)
+                    : "--";
+
+
+            document.getElementById(
+                "reportPhosphorus"
+            ).textContent =
+                p !== undefined
+                    ? formatNumber(p, 1)
+                    : "--";
+
+
+            document.getElementById(
+                "reportPotassium"
+            ).textContent =
+                k !== undefined
+                    ? formatNumber(k, 1)
+                    : "--";
+
+
+            // Soil information if available
+
+            const soilSummary =
+                document.getElementById(
+                    "reportSoilSummary"
+                );
+
+
+            const soil =
+                fertilizer.soil_status ||
+                fertilizer.soil ||
+                fertilizer.soil_profile;
+
+
+            if (
+                soil &&
+                typeof soil === "object"
+            ) {
+
+                const entries =
+                    Object.entries(
+                        soil
+                    );
+
+                if (entries.length > 0) {
+
+                    soilSummary.innerHTML = "";
+
+                    const heading =
+                        document.createElement(
+                            "strong"
+                        );
+
+                    heading.textContent =
+                        currentLanguage === "en"
+                            ? "Soil Information"
+                            : "மண் தகவல்";
+
+                    soilSummary.appendChild(
+                        heading
+                    );
+
+
+                    const list =
+                        document.createElement(
+                            "div"
+                        );
+
+                    list.className =
+                        "soil-summary-grid";
+
+
+                    entries.forEach(
+                        ([key, value]) => {
+
+                            const item =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            item.innerHTML =
+                                `<span>${key}</span>
+                                 <strong>${value}</strong>`;
+
+                            list.appendChild(
+                                item
+                            );
+                        }
+                    );
+
+
+                    soilSummary.appendChild(
+                        list
+                    );
+                }
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // INITIALIZE
+        // -----------------------------------------------------
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                populateReport();
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

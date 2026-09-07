@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        YieldROI | Prediction Result
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body class="result-page">
+
+<header class="site-header">
+
+    <div class="header-inner">
+
+        <a href="/" class="brand">
+
+            <span class="brand-mark">
+
+                <svg viewBox="0 0 48 48">
+
+                    <path
+                        d="M24 42C23 31 23 19 25 7"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="4"
+                        stroke-linecap="round"
+                    />
+
+                    <path
+                        d="M24 28C14 28 8 23 7 14c9-1 16 3 17 14Z"
+                        fill="currentColor"
+                    />
+
+                    <path
+                        d="M25 21C26 11 33 6 42 7c0 9-6 15-17 14Z"
+                        fill="currentColor"
+                    />
+
+                </svg>
+
+            </span>
+
+            <span class="brand-text">
+                YieldROI
+            </span>
+
+        </a>
+
+
+        <nav class="main-nav">
+
+            <a
+                href="/"
+                data-en="Home"
+                data-ta="முகப்பு"
+            >
+                Home
+            </a>
+
+            <a
+                href="/#features"
+                data-en="Features"
+                data-ta="அம்சங்கள்"
+            >
+                Features
+            </a>
+
+            <a
+                href="/#methodology"
+                data-en="Method"
+                data-ta="முறை"
+            >
+                Method
+            </a>
+
+        </nav>
+
+
+        <button
+            type="button"
+            class="language-switch"
+            id="languageSwitch"
+        >
+            தமிழ்
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="result-main">
+
+    <section class="result-header">
+
+        <div>
+
+            <span class="section-label">
+                YIELDROI RESULT
+            </span>
+
+            <h1
+                data-en="Your crop analysis"
+                data-ta="உங்கள் பயிர் பகுப்பாய்வு"
+            >
+                Your crop analysis
+            </h1>
+
+            <p
+                data-en="Here is the complete prediction, official benchmark comparison and scenario economic analysis."
+                data-ta="கணிப்பு, அதிகாரப்பூர்வ அளவுகோல் ஒப்பீடு மற்றும் மதிப்பிடப்பட்ட பொருளாதார பகுப்பாய்வு இங்கே உள்ளது."
+            >
+                Here is the complete prediction, official benchmark
+                comparison and scenario economic analysis.
+            </p>
+
+        </div>
+
+        <div class="result-actions">
+
+            <a
+                href="/"
+                class="outline-button"
+                data-en="New prediction"
+                data-ta="புதிய கணிப்பு"
+            >
+                New prediction
+            </a>
+
+            <button
+                type="button"
+                class="primary-button"
+                id="reportButton"
+            >
+                <span
+                    data-en="View report"
+                    data-ta="அறிக்கையை பார்க்க"
+                >
+                    View report
+                </span>
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN RESULT
+    ====================================================== -->
+
+    <section class="main-result-card">
+
+        <div class="result-context">
+
+            <div>
+
+                <span
+                    class="small-label"
+                    data-en="District"
+                    data-ta="மாவட்டம்"
+                >
+                    District
+                </span>
+
+                <strong>
+                    {{ result.district }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="small-label"
+                    data-en="Crop"
+                    data-ta="பயிர்"
+                >
+                    Crop
+                </span>
+
+                <strong>
+                    {{ result.crop }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="small-label"
+                    data-en="Season"
+                    data-ta="பருவம்"
+                >
+                    Season
+                </span>
+
+                <strong>
+                    {{ result.season }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="small-label"
+                    data-en="Year"
+                    data-ta="ஆண்டு"
+                >
+                    Year
+                </span>
+
+                <strong>
+                    {{ result.year }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="prediction-highlight">
+
+            <div>
+
+                <span
+                    class="small-label"
+                    data-en="Predicted yield"
+                    data-ta="கணிக்கப்பட்ட விளைச்சல்"
+                >
+                    Predicted yield
+                </span>
+
+                <div class="large-number">
+
+                    {{ "%.3f"|format(result.predicted_yield) }}
+
+                    <small>
+                        tonnes/ha
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="production-box">
+
+                <span
+                    class="small-label"
+                    data-en="Expected production"
+                    data-ta="எதிர்பார்க்கப்படும் உற்பத்தி"
+                >
+                    Expected production
+                </span>
+
+                <strong>
+                    {{ "%.3f"|format(result.expected_production) }}
+                    tonnes
+                </strong>
+
+                <span>
+                    {{ "%.2f"|format(result.area) }} ha
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BENCHMARK
+    ====================================================== -->
+
+    <section class="analysis-grid">
+
+        <article class="analysis-card benchmark-card">
+
+            <div class="analysis-heading">
+
+                <div>
+
+                    <span class="analysis-icon">
+                        ✓
+                    </span>
+
+                    <div>
+
+                        <span
+                            class="small-label"
+                            data-en="Official comparison"
+                            data-ta="அதிகாரப்பூர்வ ஒப்பீடு"
+                        >
+                            Official comparison
+                        </span>
+
+                        <h2
+                            data-en="Benchmark result"
+                            data-ta="அளவுகோல் முடிவு"
+                        >
+                            Benchmark result
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {% if result.benchmark.available %}
+
+            <div class="metric-grid">
+
+                <div class="metric-box">
+
+                    <span
+                        data-en="Prediction"
+                        data-ta="கணிப்பு"
+                    >
+                        Prediction
+                    </span>
+
+                    <strong>
+                        {{ "%.3f"|format(result.predicted_yield) }}
+                    </strong>
+
+                    <small>
+                        t/ha
+                    </small>
+
+                </div>
+
+
+                <div class="metric-box">
+
+                    <span
+                        data-en="Official benchmark"
+                        data-ta="அதிகாரப்பூர்வ அளவுகோல்"
+                    >
+                        Official benchmark
+                    </span>
+
+                    <strong>
+                        {{ "%.3f"|format(result.benchmark.official_yield) }}
+                    </strong>
+
+                    <small>
+                        t/ha
+                    </small>
+
+                </div>
+
+
+                <div class="metric-box">
+
+                    <span
+                        data-en="Difference"
+                        data-ta="வித்தியாசம்"
+                    >
+                        Difference
+                    </span>
+
+                    <strong
+                        class="
+                        {% if result.benchmark.difference >= 0 %}
+                            positive
+                        {% else %}
+                            negative
+                        {% endif %}
+                        "
+                    >
+                        {{ "%+.3f"|format(result.benchmark.difference) }}
+                    </strong>
+
+                    <small>
+                        t/ha
+                    </small>
+
+                </div>
+
+
+                <div class="metric-box">
+
+                    <span
+                        data-en="Difference %"
+                        data-ta="வித்தியாசம் %"
+                    >
+                        Difference %
+                    </span>
+
+                    <strong
+                        class="
+                        {% if result.benchmark.difference_pct is not none and result.benchmark.difference_pct >= 0 %}
+                            positive
+                        {% elif result.benchmark.difference_pct is not none %}
+                            negative
+                        {% endif %}
+                        "
+                    >
+                        {% if result.benchmark.difference_pct is not none %}
+                            {{ "%+.2f"|format(result.benchmark.difference_pct) }}%
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="benchmark-status">
+
+                <span
+                    class="
+                    status-badge
+                    {% if 'Above' in result.benchmark.performance %}
+                        status-above
+                    {% elif 'Below' in result.benchmark.performance %}
+                        status-below
+                    {% else %}
+                        status-near
+                    {% endif %}
+                    "
+                >
+                    {{ result.benchmark.performance }}
+                </span>
+
+                <p>
+                    Official benchmark:
+                    {{ result.benchmark.benchmark_year }}
+                </p>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-analysis">
+
+                <strong
+                    data-en="Benchmark unavailable"
+                    data-ta="அளவுகோல் கிடைக்கவில்லை"
+                >
+                    Benchmark unavailable
+                </strong>
+
+                <p>
+                    {{ result.benchmark.message }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </article>
+
+
+        <!-- =================================================
+             ROI
+        ================================================== -->
+
+        <article class="analysis-card roi-card">
+
+            <div class="analysis-heading">
+
+                <div>
+
+                    <span class="analysis-icon">
+                        ₹
+                    </span>
+
+                    <div>
+
+                        <span
+                            class="small-label"
+                            data-en="Economic analysis"
+                            data-ta="பொருளாதார பகுப்பாய்வு"
+                        >
+                            Economic analysis
+                        </span>
+
+                        <h2
+                            data-en="Scenario ROI"
+                            data-ta="மதிப்பிடப்பட்ட ROI"
+                        >
+                            Scenario ROI
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {% if result.roi.available %}
+
+            <div class="roi-main">
+
+                <div>
+
+                    <span
+                        class="small-label"
+                        data-en="Estimated ROI"
+                        data-ta="மதிப்பிடப்பட்ட ROI"
+                    >
+                        Estimated ROI
+                    </span>
+
+                    <strong
+                        class="
+                        {% if result.roi.roi_percent >= 0 %}
+                            positive
+                        {% else %}
+                            negative
+                        {% endif %}
+                        "
+                    >
+                        {{ "%+.2f"|format(result.roi.roi_percent) }}%
+                    </strong>
+
+                </div>
+
+                <span
+                    class="
+                    status-badge
+                    {% if result.roi.status == 'Profitable' %}
+                        status-above
+                    {% else %}
+                        status-below
+                    {% endif %}
+                    "
+                >
+                    {{ result.roi.status }}
+                </span>
+
+            </div>
+
+
+            <div class="roi-list">
+
+                <div>
+                    <span
+                        data-en="Cultivation cost"
+                        data-ta="சாகுபடி செலவு"
+                    >
+                        Cultivation cost
+                    </span>
+
+                    <strong>
+                        ₹{{ "{:,.0f}".format(result.roi.total_cost) }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span
+                        data-en="Reference price"
+                        data-ta="குறிப்பு விலை"
+                    >
+                        Reference price
+                    </span>
+
+                    <strong>
+                        ₹{{ "{:,.0f}".format(result.roi.reference_price) }}/t
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span
+                        data-en="Estimated revenue"
+                        data-ta="மதிப்பிடப்பட்ட வருவாய்"
+                    >
+                        Estimated revenue
+                    </span>
+
+                    <strong>
+                        ₹{{ "{:,.0f}".format(result.roi.estimated_revenue) }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span
+                        data-en="Estimated profit"
+                        data-ta="மதிப்பிடப்பட்ட லாபம்"
+                    >
+                        Estimated profit
+                    </span>
+
+                    <strong
+                        class="
+                        {% if result.roi.estimated_profit >= 0 %}
+                            positive
+                        {% else %}
+                            negative
+                        {% endif %}
+                        "
+                    >
+                        ₹{{ "{:,.0f}".format(result.roi.estimated_profit) }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <p class="analysis-note">
+                {{ result.roi.note }}
+            </p>
+
+            {% else %}
+
+            <div class="empty-analysis">
+
+                <strong
+                    data-en="ROI not available"
+                    data-ta="ROI கிடைக்கவில்லை"
+                >
+                    ROI not available
+                </strong>
+
+                <p>
+                    {{ result.roi.message }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         FERTILIZER
+    ====================================================== -->
+
+    <section class="recommendation-card">
+
+        <div class="recommendation-heading">
+
+            <div class="recommendation-icon">
+                NPK
+            </div>
+
+            <div>
+
+                <span class="small-label">
+                    YIELDROI
+                </span>
+
+                <h2
+                    data-en="Fertilizer recommendation"
+                    data-ta="உர பரிந்துரை"
+                >
+                    Fertilizer recommendation
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        {% if result.fertilizer.available %}
+
+        <div class="fertilizer-content">
+
+            {% if result.fertilizer.n is defined %}
+
+            <div class="nutrient-card">
+
+                <span>N</span>
+
+                <strong>
+                    {{ result.fertilizer.n }}
+                </strong>
+
+                <small>
+                    kg/ha
+                </small>
+
+            </div>
+
+            {% endif %}
+
+
+            {% if result.fertilizer.p2o5 is defined %}
+
+            <div class="nutrient-card">
+
+                <span>
+                    P₂O₅
+                </span>
+
+                <strong>
+                    {{ result.fertilizer.p2o5 }}
+                </strong>
+
+                <small>
+                    kg/ha
+                </small>
+
+            </div>
+
+            {% endif %}
+
+
+            {% if result.fertilizer.k2o is defined %}
+
+            <div class="nutrient-card">
+
+                <span>
+                    K₂O
+                </span>
+
+                <strong>
+                    {{ result.fertilizer.k2o }}
+                </strong>
+
+                <small>
+                    kg/ha
+                </small>
+
+            </div>
+
+            {% endif %}
+
+
+            {% if result.fertilizer.recommendation is defined %}
+
+            <p class="recommendation-text">
+                {{ result.fertilizer.recommendation }}
+            </p>
+
+            {% endif %}
+
+        </div>
+
+        {% else %}
+
+        <div class="recommendation-placeholder">
+
+            <strong
+                data-en="Soil-based recommendation"
+                data-ta="மண் அடிப்படையிலான பரிந்துரை"
+            >
+                Soil-based recommendation
+            </strong>
+
+            <p>
+                {{ result.fertilizer.message }}
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =====================================================
+         INTERPRETATION
+    ====================================================== -->
+
+    <section class="interpretation-card">
+
+        <div>
+
+            <span class="section-label">
+                INTERPRETATION
+            </span>
+
+            <h2
+                data-en="What this result means"
+                data-ta="இந்த முடிவு என்ன சொல்கிறது"
+            >
+                What this result means
+            </h2>
+
+        </div>
+
+
+        <div class="interpretation-text">
+
+            {% if result.benchmark.available %}
+
+                {% if result.benchmark.performance == "Above benchmark" %}
+
+                <p
+                    data-en="The predicted yield is above the selected official benchmark for this district and crop."
+                    data-ta="இந்த மாவட்டம் மற்றும் பயிரிற்கான அதிகாரப்பூர்வ அளவுகோலை விட கணிக்கப்பட்ட விளைச்சல் அதிகமாக உள்ளது."
+                >
+                    The predicted yield is above the selected official
+                    benchmark for this district and crop.
+                </p>
+
+                {% elif result.benchmark.performance == "Below benchmark" %}
+
+                <p
+                    data-en="The predicted yield is below the selected official benchmark. This result should be treated as a planning signal rather than a guaranteed outcome."
+                    data-ta="கணிக்கப்பட்ட விளைச்சல் அதிகாரப்பூர்வ அளவுகோலை விட குறைவாக உள்ளது. இது திட்டமிடலுக்கான ஒரு அறிகுறியாக மட்டுமே கருதப்பட வேண்டும்."
+                >
+                    The predicted yield is below the selected official
+                    benchmark. This result should be treated as a planning
+                    signal rather than a guaranteed outcome.
+                </p>
+
+                {% else %}
+
+                <p
+                    data-en="The predicted yield is close to the selected official benchmark, indicating a result broadly aligned with the reference value."
+                    data-ta="கணிக்கப்பட்ட விளைச்சல் அதிகாரப்பூர்வ அளவுகோலுக்கு அருகில் உள்ளது."
+                >
+                    The predicted yield is close to the selected official
+                    benchmark, indicating a result broadly aligned with
+                    the reference value.
+                </p>
+
+                {% endif %}
+
+            {% else %}
+
+            <p>
+                {{ result.benchmark.message }}
+            </p>
+
+            {% endif %}
+
+
+            <p
+                data-en="The economic section is a scenario calculation based on reference cost and price values. It should not be interpreted as a guaranteed farm-level profit."
+                data-ta="பொருளாதார பகுதி குறிப்பு செலவு மற்றும் விலை மதிப்புகளை அடிப்படையாகக் கொண்ட மதிப்பீடு மட்டுமே. இது உறுதியான பண்ணை லாபமாக கருதப்படக்கூடாது."
+            >
+                The economic section is a scenario calculation based on
+                reference cost and price values. It should not be interpreted
+                as a guaranteed farm-level profit.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BOTTOM ACTIONS
+    ====================================================== -->
+
+    <section class="bottom-actions">
+
+        <a
+            href="/"
+            class="outline-button"
+            data-en="Start another prediction"
+            data-ta="மற்றொரு கணிப்பை தொடங்குங்கள்"
+        >
+            Start another prediction
+        </a>
+
+        <button
+            type="button"
+            class="primary-button"
+            id="printReportButton"
+        >
+            <span
+                data-en="Print full report"
+                data-ta="முழு அறிக்கையை அச்சிடுக"
+            >
+                Print full report
+            </span>
+        </button>
+
+    </section>
+
+</main>
+
+
+<!-- =========================================================
+     REPORT DATA
+========================================================== -->
+
+<script>
+    window.YIELDROI_RESULT = {{ result | tojson }};
+</script>
+
+<script
+    src="{{ url_for('static', filename='script.js') }}"
+></script>
+
+</body>
+</html>

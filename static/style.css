@@ -1,0 +1,1311 @@
+/* ============================================================
+   YieldROI
+   Main Stylesheet
+   ============================================================ */
+
+:root {
+
+    --green-dark: #174b36;
+    --green: #23734c;
+    --green-light: #4f9b70;
+
+    --cream: #f7f5ec;
+    --cream-dark: #ece8d9;
+
+    --white: #ffffff;
+
+    --text-dark: #18352a;
+    --text-light: #61746a;
+
+    --border: #dce5df;
+
+    --shadow:
+        0 20px 60px rgba(24, 75, 54, 0.10);
+
+    --radius: 22px;
+
+    --font:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+/* ============================================================
+   RESET
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    font-family: var(--font);
+
+    color: var(--text-dark);
+
+    background: var(--cream);
+
+    font-size: 17px;
+
+    line-height: 1.6;
+
+    overflow-x: hidden;
+}
+
+
+button,
+input,
+select {
+
+    font-family: inherit;
+}
+
+
+button {
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.main-header {
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+
+    padding: 25px 5vw;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    z-index: 50;
+}
+
+
+.logo-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.logo-mark {
+
+    width: 45px;
+    height: 45px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.90);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 23px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.08);
+}
+
+
+.logo-name {
+
+    font-size: 25px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
+
+    color: var(--green-dark);
+}
+
+
+.logo-tagline {
+
+    font-size: 12px;
+
+    color: var(--text-light);
+
+    margin-top: -3px;
+}
+
+
+.language-switch {
+
+    border: none;
+
+    background: var(--green-dark);
+
+    color: white;
+
+    padding: 10px 20px;
+
+    border-radius: 30px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    min-width: 82px;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.language-switch:hover {
+
+    transform: translateY(-2px);
+
+    background: var(--green);
+}
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero-section {
+
+    min-height: 100vh;
+
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background:
+        linear-gradient(
+            180deg,
+            #e8f5f0 0%,
+            #dff1e9 48%,
+            #d5e9d7 100%
+        );
+}
+
+
+.hero-section::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 700px;
+    height: 700px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.75),
+            transparent 70%
+        );
+
+    top: -250px;
+    right: -180px;
+}
+
+
+.hero-content {
+
+    position: relative;
+
+    z-index: 10;
+
+    max-width: 900px;
+
+    padding:
+        120px 30px
+        260px;
+
+}
+
+
+.hero-small-title {
+
+    display: inline-block;
+
+    font-size: 14px;
+
+    letter-spacing: 3px;
+
+    font-weight: 700;
+
+    color: var(--green);
+
+    margin-bottom: 24px;
+}
+
+
+.hero-content h1 {
+
+    font-size:
+        clamp(52px, 7vw, 100px);
+
+    line-height: 0.98;
+
+    letter-spacing: -4px;
+
+    color: var(--green-dark);
+
+    font-weight: 700;
+
+    margin-bottom: 30px;
+}
+
+
+.hero-description {
+
+    max-width: 690px;
+
+    margin: auto;
+
+    font-size:
+        clamp(18px, 2vw, 22px);
+
+    line-height: 1.65;
+
+    color: #4d655a;
+}
+
+
+/* ============================================================
+   HERO AGRICULTURE LANDSCAPE
+   ============================================================ */
+
+.hero-art {
+
+    position: absolute;
+
+    bottom: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 310px;
+
+    overflow: hidden;
+}
+
+
+.sun {
+
+    position: absolute;
+
+    width: 130px;
+    height: 130px;
+
+    border-radius: 50%;
+
+    background: #f8dd55;
+
+    left: 50%;
+
+    bottom: 135px;
+
+    transform: translateX(-50%);
+
+    opacity: 0.95;
+
+    box-shadow:
+        0 0 70px rgba(248,221,85,0.45);
+}
+
+
+.hill {
+
+    position: absolute;
+
+    left: -10%;
+
+    width: 120%;
+
+    border-radius: 50% 50% 0 0;
+
+}
+
+
+.hill-back {
+
+    height: 190px;
+
+    bottom: 95px;
+
+    background: #b8d99e;
+
+    transform:
+        rotate(-2deg);
+}
+
+
+.hill-middle {
+
+    height: 180px;
+
+    bottom: 20px;
+
+    background: #82b878;
+
+    transform:
+        rotate(2deg);
+}
+
+
+.field {
+
+    position: absolute;
+
+    width: 120%;
+
+    left: -10%;
+
+    border-radius: 50% 50% 0 0;
+}
+
+
+.field-one {
+
+    height: 135px;
+
+    bottom: -50px;
+
+    background: #57955e;
+}
+
+
+.field-two {
+
+    height: 100px;
+
+    bottom: -55px;
+
+    background: #3f7f4b;
+
+    transform:
+        rotate(-3deg);
+}
+
+
+.field-three {
+
+    height: 75px;
+
+    bottom: -55px;
+
+    background: #326b41;
+
+    transform:
+        rotate(3deg);
+}
+
+
+/* ============================================================
+   FARM HOUSE
+   ============================================================ */
+
+.farm-house {
+
+    position: absolute;
+
+    bottom: 78px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 120px;
+
+    height: 100px;
+}
+
+
+.house-body {
+
+    position: absolute;
+
+    left: 12px;
+
+    bottom: 0;
+
+    width: 96px;
+
+    height: 65px;
+
+    background: #c66d4b;
+
+    border-radius: 3px;
+}
+
+
+.house-roof {
+
+    position: absolute;
+
+    left: 4px;
+
+    top: 4px;
+
+    width: 0;
+    height: 0;
+
+    border-left:
+        56px solid transparent;
+
+    border-right:
+        56px solid transparent;
+
+    border-bottom:
+        48px solid #713a30;
+}
+
+
+.house-door {
+
+    position: absolute;
+
+    left: 47px;
+
+    bottom: 0;
+
+    width: 20px;
+
+    height: 39px;
+
+    background: #57372c;
+}
+
+
+.house-window {
+
+    position: absolute;
+
+    right: 21px;
+
+    bottom: 27px;
+
+    width: 19px;
+
+    height: 18px;
+
+    background: #dceee8;
+
+    border: 3px solid #774438;
+}
+
+
+/* ============================================================
+   TREES
+   ============================================================ */
+
+.tree {
+
+    position: absolute;
+
+    bottom: 100px;
+
+    width: 75px;
+
+    height: 115px;
+}
+
+
+.tree::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 34px;
+
+    bottom: 0;
+
+    width: 9px;
+
+    height: 70px;
+
+    background: #604838;
+}
+
+
+.tree span,
+.tree::after {
+
+    content: "";
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    background: #2e6941;
+}
+
+
+.tree span {
+
+    width: 62px;
+    height: 62px;
+
+    left: 5px;
+    top: 10px;
+}
+
+
+.tree::after {
+
+    width: 45px;
+    height: 45px;
+
+    left: 25px;
+    top: 0;
+}
+
+
+.tree-one {
+
+    left: 13%;
+
+    transform: scale(0.9);
+}
+
+
+.tree-two {
+
+    right: 12%;
+
+    transform: scale(1.15);
+}
+
+
+/* ============================================================
+   FENCE
+   ============================================================ */
+
+.fence {
+
+    position: absolute;
+
+    bottom: 38px;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 55px;
+}
+
+
+.fence::before,
+.fence::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 5px;
+
+    background: #725d47;
+
+    opacity: 0.75;
+}
+
+
+.fence::before {
+    top: 17px;
+}
+
+
+.fence::after {
+    top: 38px;
+}
+
+
+.fence i {
+
+    position: relative;
+
+    display: inline-block;
+
+    width: 8px;
+
+    height: 60px;
+
+    background: #725d47;
+
+    margin-left: 7vw;
+
+    transform:
+        rotate(1deg);
+
+    opacity: 0.8;
+}
+
+
+/* ============================================================
+   HERO ARROW
+   ============================================================ */
+
+.hero-arrow {
+
+    position: absolute;
+
+    z-index: 20;
+
+    bottom: 28px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 72px;
+    height: 72px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f5df3e;
+
+    color: #214b34;
+
+    font-size: 36px;
+
+    font-weight: 400;
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.15);
+
+    animation:
+        arrowFloat 2s ease-in-out infinite;
+
+    transition:
+        transform 0.25s ease;
+}
+
+
+.hero-arrow:hover {
+
+    transform:
+        translateX(-50%)
+        scale(1.08);
+}
+
+
+@keyframes arrowFloat {
+
+    0%,
+    100% {
+        transform:
+            translateX(-50%)
+            translateY(0);
+    }
+
+    50% {
+        transform:
+            translateX(-50%)
+            translateY(-10px);
+    }
+}
+
+
+/* ============================================================
+   PREDICTION SECTION
+   ============================================================ */
+
+.prediction-section {
+
+    min-height: 100vh;
+
+    padding:
+        110px 25px
+        120px;
+
+    background:
+        var(--cream);
+}
+
+
+.prediction-wrapper {
+
+    width: 100%;
+
+    max-width: 1050px;
+
+    margin: auto;
+}
+
+
+.prediction-heading {
+
+    text-align: center;
+
+    max-width: 750px;
+
+    margin:
+        0 auto
+        50px;
+}
+
+
+.section-kicker {
+
+    font-size: 13px;
+
+    letter-spacing: 2.5px;
+
+    font-weight: 700;
+
+    color: var(--green);
+
+    margin-bottom: 15px;
+}
+
+
+.prediction-heading h2 {
+
+    font-size:
+        clamp(38px, 5vw, 58px);
+
+    line-height: 1.1;
+
+    letter-spacing: -2px;
+
+    color: var(--green-dark);
+
+    margin-bottom: 18px;
+}
+
+
+.prediction-heading p {
+
+    font-size: 19px;
+
+    color: var(--text-light);
+
+    line-height: 1.65;
+}
+
+
+/* ============================================================
+   FORM CARD
+   ============================================================ */
+
+.prediction-card {
+
+    background: white;
+
+    border-radius: 28px;
+
+    padding: 45px;
+
+    box-shadow:
+        var(--shadow);
+
+    border:
+        1px solid rgba(35,115,76,0.08);
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 28px;
+}
+
+
+/* ============================================================
+   FORM GROUP
+   ============================================================ */
+
+.form-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.form-group label {
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: var(--green-dark);
+}
+
+
+.select-wrapper,
+.area-input-wrapper {
+
+    position: relative;
+}
+
+
+select,
+input {
+
+    width: 100%;
+
+    height: 60px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 14px;
+
+    background: #fbfcfa;
+
+    padding:
+        0 18px;
+
+    color: var(--text-dark);
+
+    font-size: 17px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+select {
+
+    appearance: none;
+
+    padding-right: 50px;
+
+    cursor: pointer;
+}
+
+
+.select-wrapper::after {
+
+    content: "⌄";
+
+    position: absolute;
+
+    right: 18px;
+
+    top: 50%;
+
+    transform: translateY(-58%);
+
+    font-size: 23px;
+
+    color: var(--green);
+
+    pointer-events: none;
+}
+
+
+select:focus,
+input:focus {
+
+    border-color: var(--green);
+
+    background: white;
+
+    box-shadow:
+        0 0 0 4px rgba(35,115,76,0.09);
+}
+
+
+input::placeholder {
+
+    color: #8a9b92;
+}
+
+
+.area-input-wrapper input {
+
+    padding-right: 65px;
+}
+
+
+.area-unit {
+
+    position: absolute;
+
+    right: 18px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-weight: 700;
+
+    color: var(--green);
+}
+
+
+/* ============================================================
+   SUBMIT
+   ============================================================ */
+
+.form-submit {
+
+    grid-column:
+        1 / -1;
+
+    display: flex;
+
+    justify-content: center;
+
+    margin-top: 12px;
+}
+
+
+.predict-button {
+
+    min-width: 270px;
+
+    height: 62px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    background:
+        var(--green-dark);
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    padding:
+        0 35px;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.predict-button:hover {
+
+    background: var(--green);
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 12px 30px rgba(23,75,54,0.18);
+}
+
+
+.predict-button:disabled {
+
+    cursor: wait;
+
+    opacity: 0.75;
+
+    transform: none;
+}
+
+
+/* Loading */
+
+.loading-text {
+
+    display: none;
+}
+
+
+.predict-button.loading
+.button-text {
+
+    display: none;
+}
+
+
+.predict-button.loading
+.loading-text {
+
+    display: inline;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.form-error {
+
+    grid-column:
+        1 / -1;
+
+    text-align: center;
+
+    color: #b33c3c;
+
+    font-size: 15px;
+
+    min-height: 24px;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.simple-footer {
+
+    text-align: center;
+
+    padding:
+        28px 20px;
+
+    background: var(--green-dark);
+
+    color: rgba(255,255,255,0.8);
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   TAMIL
+   ============================================================ */
+
+body.tamil-mode {
+
+    letter-spacing: 0;
+}
+
+
+body.tamil-mode .hero-content h1 {
+
+    letter-spacing: -1px;
+
+    line-height: 1.15;
+}
+
+
+body.tamil-mode
+.prediction-heading h2 {
+
+    letter-spacing: -1px;
+
+    line-height: 1.3;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 800px) {
+
+    .main-header {
+
+        padding:
+            20px 22px;
+    }
+
+
+    .logo-name {
+        font-size: 21px;
+    }
+
+
+    .logo-tagline {
+        font-size: 10px;
+    }
+
+
+    .hero-content {
+
+        padding:
+            120px 22px
+            250px;
+    }
+
+
+    .hero-content h1 {
+
+        font-size:
+            clamp(46px, 12vw, 70px);
+
+        letter-spacing:
+            -2px;
+    }
+
+
+    .hero-description {
+
+        font-size: 17px;
+    }
+
+
+    .prediction-section {
+
+        padding:
+            80px 18px;
+    }
+
+
+    .prediction-card {
+
+        grid-template-columns:
+            1fr;
+
+        padding: 28px 22px;
+
+        border-radius: 22px;
+    }
+
+
+    .form-submit {
+
+        grid-column:
+            auto;
+    }
+
+
+    .form-error {
+
+        grid-column:
+            auto;
+    }
+
+
+    .predict-button {
+
+        width: 100%;
+
+        min-width: 0;
+    }
+
+
+    .hero-art {
+
+        height: 260px;
+    }
+
+
+    .sun {
+
+        width: 100px;
+        height: 100px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    body {
+        font-size: 16px;
+    }
+
+
+    .language-switch {
+
+        padding:
+            9px 15px;
+
+        min-width: 70px;
+    }
+
+
+    .hero-small-title {
+
+        font-size: 11px;
+
+        letter-spacing: 1.7px;
+    }
+
+
+    .hero-content h1 {
+
+        font-size: 48px;
+    }
+
+
+    .hero-arrow {
+
+        width: 62px;
+        height: 62px;
+
+        font-size: 30px;
+
+        bottom: 20px;
+    }
+
+
+    .prediction-heading h2 {
+
+        font-size: 38px;
+    }
+
+
+    select,
+    input {
+
+        height: 57px;
+
+        font-size: 16px;
+    }
+}
+
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+
+@media print {
+
+    .main-header,
+    .hero-section,
+    .prediction-section,
+    .simple-footer {
+
+        display: none !important;
+    }
+}

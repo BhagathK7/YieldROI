@@ -1,14 +1,14 @@
 {
     "overall": {
-        "MAE": 99.84474950701723,
-        "RMSE": 761.8498945732016,
-        "R2": 0.8522503928644116
+        "MAE": 99.84474950701728,
+        "RMSE": 761.849894573202,
+        "R2": 0.8522503928644114
     },
     "prediction_error": {
-        "mean_error": -69.59636930823169,
+        "mean_error": -69.59636930823177,
         "median_error": -0.015184295462253639,
-        "mean_absolute_error": 99.84474950701723,
-        "maximum_absolute_error": 13304.707906843376
+        "mean_absolute_error": 99.84474950701728,
+        "maximum_absolute_error": 13304.707906843396
     },
     "dataset": {
         "samples": 2919,
