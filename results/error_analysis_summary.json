@@ -1,0 +1,20 @@
+{
+    "overall": {
+        "MAE": 99.84474950701723,
+        "RMSE": 761.8498945732016,
+        "R2": 0.8522503928644116
+    },
+    "prediction_error": {
+        "mean_error": -69.59636930823169,
+        "median_error": -0.015184295462253639,
+        "mean_absolute_error": 99.84474950701723,
+        "maximum_absolute_error": 13304.707906843376
+    },
+    "dataset": {
+        "samples": 2919,
+        "crops": 38,
+        "districts": 38,
+        "seasons": 6,
+        "years": 2
+    }
+}

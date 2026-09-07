@@ -1,0 +1,34 @@
+{
+    "experiment": "Crop-aware Random Forest Log",
+    "global_model": {
+        "validation": {
+            "MAE": 71.10575088262286,
+            "RMSE": 526.5902014206821,
+            "R2": 0.8963274966370228
+        },
+        "test": {
+            "MAE": 99.84474950701728,
+            "RMSE": 761.849894573202,
+            "R2": 0.8522503928644114
+        }
+    },
+    "crop_aware_model": {
+        "validation": {
+            "MAE": 82.00559082731372,
+            "RMSE": 581.2515779673089,
+            "R2": 0.8736875008352791
+        },
+        "test": {
+            "MAE": 84.25689458897241,
+            "RMSE": 648.1911735553897,
+            "R2": 0.8930468113205738
+        }
+    },
+    "selected_approach": "Global Random Forest Log",
+    "selected_test_metrics": {
+        "MAE": 99.84474950701728,
+        "RMSE": 761.849894573202,
+        "R2": 0.8522503928644114
+    },
+    "bias_smoothing": 50
+}
