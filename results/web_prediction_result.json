@@ -1,0 +1,23 @@
+{
+    "generated_at": "2026-09-07T15:25:17.966883",
+    "district": "Thanjavur",
+    "crop": "Arecanut",
+    "season": "Kharif",
+    "year": 2022,
+    "area": 1.0,
+    "predicted_yield": 1.6006729715490824,
+    "benchmark": {
+        "available": false,
+        "official_yield": null,
+        "difference": null,
+        "difference_pct": null,
+        "performance": "Above benchmark",
+        "unit": null,
+        "source": "Tamil Nadu official 2024\u201325 district average yield benchmark"
+    },
+    "roi": {
+        "available": false,
+        "production_tonnes": 1.6006729715490824
+    },
+    "model_test_r2": 0.8523
+}

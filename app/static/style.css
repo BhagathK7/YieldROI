@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
-
-
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 /* =====================================================
    YIELDROI — VISUAL SYSTEM
    Calm botanical / sage / cream theme
@@ -215,14 +213,12 @@ body::before {
 
 
 .brand-name {
-
     font:
+        700 26px/1
+        "Manrope",
+        sans-serif;
 
-        600 35px/1
-        "Cormorant Garamond",
-        serif;
-
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;
 }
 
 
@@ -390,14 +386,13 @@ h1 {
     color: #103a2c;
 
     font:
-
-        600 clamp(
-            68px,
+        700 clamp(
+            58px,
             6.1vw,
-            94px
-        ) / 0.90
-        "Cormorant Garamond",
-        serif;
+            88px
+        ) / 0.95
+        "Manrope",
+        sans-serif;
 
     letter-spacing: -3px;
 }
@@ -509,19 +504,7 @@ h1 em {
 
 .handwritten {
 
-    margin: 54px 0 0 2px;
-
-    color: #39724a;
-
-    font:
-
-        italic 27px/1.05
-        "Cormorant Garamond",
-        serif;
-
-    transform: rotate(-5deg);
-
-    opacity: 0.95;
+    display: none;
 }
 
 
@@ -620,16 +603,14 @@ h1 em {
 
 
 .card-heading h2 {
-
     margin: 0 0 5px;
 
     font:
+        700 30px/1.1
+        "Manrope",
+        sans-serif;
 
-        600 39px/1
-        "Cormorant Garamond",
-        serif;
-
-    letter-spacing: -0.8px;
+    letter-spacing: -1px;
 }
 
 
@@ -839,19 +820,15 @@ h1 em {
 ===================================================== */
 
 .predict-button {
-
     margin-top: 28px;
 
     width: 100%;
-
     height: 71px;
 
     border: 0;
-
     border-radius: 35px;
 
     background:
-
         linear-gradient(
             135deg,
             #4d9658,
@@ -861,30 +838,24 @@ h1 em {
     color: white;
 
     font:
+        700 16px
+        "Manrope",
+        sans-serif;
 
-        600 18px
-        "Cormorant Garamond",
-        serif;
-
-    letter-spacing: 0.2px;
+    letter-spacing: 0.1px;
 
     cursor: pointer;
 
     box-shadow:
-
         0 12px 25px
         rgba(56, 116, 65, 0.20);
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     gap: 15px;
 
     transition:
-
         transform 0.2s ease,
         box-shadow 0.2s ease;
 }
@@ -1046,8 +1017,8 @@ h1 em {
     font:
 
         600 27px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
@@ -1056,8 +1027,8 @@ h1 em {
     font:
 
         600 31px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 
     color: #347744;
 
@@ -1234,8 +1205,8 @@ h1 em {
     font:
 
         600 24px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
@@ -1306,8 +1277,8 @@ h1 em {
     font:
 
         600 43px/1.05
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
@@ -1678,8 +1649,8 @@ h1 em {
 
     font:
         600 38px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
@@ -1710,8 +1681,8 @@ h1 em {
 
     font:
         600 75px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 
     line-height: .95;
 }
@@ -1857,8 +1828,8 @@ h1 em {
 
     font:
         600 30px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
@@ -1870,8 +1841,8 @@ h1 em {
 
     font:
         600 54px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
@@ -2110,8 +2081,8 @@ h1 em {
 
     font:
         600 19px
-        "Cormorant Garamond",
-        serif;
+        "Manrope",
+        sans-serif;
 }
 
 
