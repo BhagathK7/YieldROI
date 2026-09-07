@@ -1,0 +1,21 @@
+{
+    "status": "success",
+    "crop": "Rice",
+    "area_hectares": 1.0,
+    "predicted_yield_tonnes_per_ha": 5.0,
+    "predicted_production_tonnes": 5.0,
+    "cost_per_hectare": 93687.0,
+    "total_cost": 93687.0,
+    "price_per_tonne": 24410.0,
+    "price_type": "MSP - Paddy Common",
+    "revenue": 122050.0,
+    "profit": 28363.0,
+    "roi_percentage": 30.27,
+    "profitability_status": "Profitable",
+    "reference_yield_tonnes_per_ha": null,
+    "yield_difference_tonnes_per_ha": null,
+    "yield_difference_percentage": null,
+    "cost_source": "Tamil Nadu Agriculture - Cost of Cultivation",
+    "price_source": "Tamil Nadu Agriculture - MSP 2026-27",
+    "calculation_basis": "Benchmark/scenario ROI using predicted yield, cultivation cost and reference crop price."
+}

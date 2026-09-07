@@ -1,0 +1,28 @@
+{
+    "project": "YieldROI",
+    "input": {
+        "district": "Thanjavur",
+        "crop": "Rice",
+        "season": "Kharif",
+        "year": 2022,
+        "area_hectares": 100.0
+    },
+    "yield_prediction": {
+        "predicted_yield_tonnes_per_ha": 3.2758,
+        "predicted_production_tonnes": 327.5847
+    },
+    "economic_analysis": {
+        "predicted_yield_tonnes_per_ha": 3.2758,
+        "predicted_production_tonnes": 327.5847,
+        "cost_per_hectare": 93687.0,
+        "total_cost": 9368700.0,
+        "price_per_tonne": 24410.0,
+        "price_type": "MSP - Paddy Common",
+        "revenue": 7996342.39,
+        "profit": -1372357.61,
+        "roi_percentage": -14.65,
+        "profitability_status": "Loss"
+    },
+    "calculation_basis": "Benchmark/scenario ROI using the YieldROI ML yield prediction, official cultivation-cost benchmark and reference crop price.",
+    "model_file": "C:\\Users\\bhaga\\OneDrive\\Documents\\Agri_Project\\Sec_rev\\YieldROI\\models\\best_yield_model.joblib"
+}
