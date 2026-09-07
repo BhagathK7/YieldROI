@@ -62,6 +62,7 @@ FERTILIZER_KB_PATH = FERTILIZER_DIR / "fertilizer_knowledge_base.csv"
 # ============================================================
 
 def load_yield_data():
+
     if not YIELD_DATA_PATH.exists():
         raise FileNotFoundError(
             f"Yield dataset not found:\n{YIELD_DATA_PATH}"
@@ -71,31 +72,44 @@ def load_yield_data():
 
     # Make sure year exists in a usable form
     if "year" not in df.columns:
+
         if "fiscal_year" in df.columns:
+
             df["year"] = (
                 df["fiscal_year"]
                 .astype(str)
                 .str[:4]
                 .astype(int)
             )
+
         else:
+
             raise ValueError(
-                "Yield dataset does not contain 'year' or 'fiscal_year'."
+                "Yield dataset does not contain "
+                "'year' or 'fiscal_year'."
             )
 
     return df
 
 
 def load_benchmark_data():
+
     if not BENCHMARK_PATH.exists():
-        print(f"WARNING: Benchmark file not found: {BENCHMARK_PATH}")
+
+        print(
+            f"WARNING: Benchmark file not found: "
+            f"{BENCHMARK_PATH}"
+        )
+
         return pd.DataFrame()
 
     return pd.read_csv(BENCHMARK_PATH)
 
 
 def load_model():
+
     if not MODEL_PATH.exists():
+
         raise FileNotFoundError(
             f"Model not found:\n{MODEL_PATH}"
         )
@@ -104,15 +118,33 @@ def load_model():
 
 
 def load_metrics():
+
     if not METRICS_PATH.exists():
-        print(f"WARNING: Model metrics not found: {METRICS_PATH}")
+
+        print(
+            f"WARNING: Model metrics not found: "
+            f"{METRICS_PATH}"
+        )
+
         return {}
 
     try:
-        with open(METRICS_PATH, "r", encoding="utf-8") as file:
+
+        with open(
+            METRICS_PATH,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
             return json.load(file)
+
     except Exception as exc:
-        print(f"WARNING: Could not read model metrics: {exc}")
+
+        print(
+            f"WARNING: Could not read model metrics: "
+            f"{exc}"
+        )
+
         return {}
 
 
@@ -125,12 +157,16 @@ BENCHMARK_DF = load_benchmark_data()
 MODEL = load_model()
 MODEL_METRICS = load_metrics()
 
+# Fertilizer recommender is loaded only when required.
+FERTILIZER_RECOMMENDER = None
+
 
 # ============================================================
 # NORMALIZATION HELPERS
 # ============================================================
 
 def normalize_text(value):
+
     if value is None:
         return ""
 
@@ -144,12 +180,14 @@ def normalize_text(value):
 
 
 def find_column(df, possible_names):
+
     normalized = {
         normalize_text(column): column
         for column in df.columns
     }
 
     for name in possible_names:
+
         key = normalize_text(name)
 
         if key in normalized:
@@ -163,8 +201,15 @@ def find_column(df, possible_names):
 # ============================================================
 
 CROP_MAP = {
+
     "rice": "paddy",
     "paddy": "paddy",
+
+    "red gram": "red gram",
+    "redgram": "red gram",
+    "arhar tur": "red gram",
+    "arhar(tur)": "red gram",
+    "tur": "red gram",
 
     "sugarcane": "sugar cane",
     "sugar cane": "sugar cane",
@@ -196,6 +241,7 @@ CROP_MAP = {
 
 
 DISTRICT_MAP = {
+
     "tiruchirappalli": "trichy",
     "trichy": "trichy",
 
@@ -227,24 +273,30 @@ def compare_with_benchmark(
     season,
     predicted_yield
 ):
-    """
-    Compare predicted yield with the official 2024-25
-    Tamil Nadu district-wise benchmark.
 
-    Historical model output:
-        tonnes/ha
+    """
+    Compare model prediction with the official
+    Tamil Nadu 2024-25 district-wise average
+    yield benchmark.
+
+    Model output:
+        tonnes/hectare
 
     Benchmark:
-        Usually kg/ha
-        Sugar cane -> tonnes/ha
-        Coconut -> nuts/ha
+        Usually kg/hectare
+        Sugar cane -> tonnes/hectare
+        Coconut -> nuts/hectare
     """
 
     if BENCHMARK_DF.empty:
+
         return {
             "available": False,
-            "message": "Official benchmark data is not available."
+            "message": (
+                "Official benchmark data is not available."
+            )
         }
+
 
     district_col = find_column(
         BENCHMARK_DF,
@@ -263,7 +315,12 @@ def compare_with_benchmark(
 
     yield_col = find_column(
         BENCHMARK_DF,
-        ["yield", "yield_rate", "average_yield", "value"]
+        [
+            "yield",
+            "yield_rate",
+            "average_yield",
+            "value"
+        ]
     )
 
     unit_col = find_column(
@@ -271,15 +328,21 @@ def compare_with_benchmark(
         ["unit", "yield_unit"]
     )
 
+
     if not district_col or not crop_col or not yield_col:
+
         return {
             "available": False,
-            "message": "Benchmark columns could not be identified."
+            "message": (
+                "Benchmark columns could not be identified."
+            )
         }
+
 
     target_district = normalize_text(district)
     target_crop = normalize_text(crop)
     target_season = normalize_text(season)
+
 
     mapped_district = DISTRICT_MAP.get(
         target_district,
@@ -291,157 +354,281 @@ def compare_with_benchmark(
         target_crop
     )
 
+
     df = BENCHMARK_DF.copy()
 
-    df["_district"] = df[district_col].apply(normalize_text)
-    df["_crop"] = df[crop_col].apply(normalize_text)
+    df["_district"] = (
+        df[district_col]
+        .apply(normalize_text)
+    )
 
+    df["_crop"] = (
+        df[crop_col]
+        .apply(normalize_text)
+    )
+
+
+    # --------------------------------------------------------
     # District match
+    # --------------------------------------------------------
+
     district_matches = df[
         df["_district"] == mapped_district
     ]
 
+
     if district_matches.empty:
-        # Try original district name
+
         district_matches = df[
             df["_district"] == target_district
         ]
 
+
     if district_matches.empty:
+
         return {
             "available": False,
-            "message": f"No official benchmark found for {district}."
+            "message": (
+                f"No official benchmark found "
+                f"for {district}."
+            )
         }
 
+
+    # --------------------------------------------------------
     # Crop match
+    # --------------------------------------------------------
+
     crop_matches = district_matches[
         district_matches["_crop"] == mapped_crop
     ]
 
+
     if crop_matches.empty:
+
         crop_matches = district_matches[
             district_matches["_crop"] == target_crop
         ]
 
+
     if crop_matches.empty:
+
         return {
             "available": False,
             "message": (
-                f"No official benchmark found for "
-                f"{district} / {crop}."
+                f"No official benchmark found "
+                f"for {district} / {crop}."
             )
         }
 
+
     selected = pd.DataFrame()
 
-    # Try exact season first
+
+    # --------------------------------------------------------
+    # Season match
+    # --------------------------------------------------------
+
     if season_col:
+
         crop_matches = crop_matches.copy()
+
         crop_matches["_season"] = (
             crop_matches[season_col]
             .apply(normalize_text)
         )
 
+
         selected = crop_matches[
             crop_matches["_season"] == target_season
         ]
 
-    # If exact season isn't available, use Combined
+
+    # If exact season is unavailable,
+    # use Combined / Overall.
+
     if selected.empty and season_col:
+
         selected = crop_matches[
             crop_matches["_season"].isin(
-                ["combined", "overall", "all seasons"]
+                [
+                    "combined",
+                    "overall",
+                    "all seasons"
+                ]
             )
         ]
 
+
     # Last fallback
+
     if selected.empty:
+
         selected = crop_matches
 
+
     if selected.empty:
-        return {
-            "available": False,
-            "message": "No suitable benchmark value found."
-        }
 
-    row = selected.iloc[0]
-
-    try:
-        benchmark_value = float(row[yield_col])
-    except (ValueError, TypeError):
-        return {
-            "available": False,
-            "message": "Benchmark yield is not numeric."
-        }
-
-    unit = ""
-    if unit_col:
-        unit = str(row[unit_col])
-
-    normalized_unit = normalize_text(unit)
-
-    # --------------------------------------------------------
-    # Coconut cannot be compared with tonnes/ha yield
-    # --------------------------------------------------------
-
-    if "nut" in normalized_unit:
         return {
             "available": False,
             "message": (
-                "Benchmark uses nuts/ha, while the model "
-                "predicts tonnes/ha. Direct comparison is not valid."
+                "No suitable benchmark value found."
+            )
+        }
+
+
+    row = selected.iloc[0]
+
+
+    # --------------------------------------------------------
+    # Numeric benchmark value
+    # --------------------------------------------------------
+
+    try:
+
+        benchmark_value = float(
+            row[yield_col]
+        )
+
+    except (ValueError, TypeError):
+
+        return {
+            "available": False,
+            "message": (
+                "Benchmark yield is not numeric."
+            )
+        }
+
+
+    unit = ""
+
+    if unit_col:
+
+        unit = str(row[unit_col])
+
+
+    normalized_unit = normalize_text(unit)
+
+
+    # --------------------------------------------------------
+    # Coconut
+    # --------------------------------------------------------
+
+    if "nut" in normalized_unit:
+
+        return {
+            "available": False,
+            "message": (
+                "Benchmark uses nuts/ha, while "
+                "the model predicts tonnes/ha. "
+                "Direct comparison is not valid."
             ),
             "unit": unit
         }
 
+
     # --------------------------------------------------------
-    # Convert kg/ha -> tonnes/ha
+    # Convert kg/ha to tonnes/ha
     # --------------------------------------------------------
 
     if "kg" in normalized_unit:
-        benchmark_tonnes = benchmark_value / 1000.0
+
+        benchmark_tonnes = (
+            benchmark_value / 1000.0
+        )
 
     elif "tonne" in normalized_unit:
+
         benchmark_tonnes = benchmark_value
 
     else:
-        # Fallback for older benchmark rows
+
+        # Fallback for older benchmark rows.
+
         if benchmark_value > 100:
-            benchmark_tonnes = benchmark_value / 1000.0
+
+            benchmark_tonnes = (
+                benchmark_value / 1000.0
+            )
+
         else:
+
             benchmark_tonnes = benchmark_value
 
-    difference = predicted_yield - benchmark_tonnes
+
+    # --------------------------------------------------------
+    # Difference
+    # --------------------------------------------------------
+
+    difference = (
+        predicted_yield -
+        benchmark_tonnes
+    )
+
 
     if benchmark_tonnes != 0:
+
         percentage_difference = (
-            difference / benchmark_tonnes
+            difference /
+            benchmark_tonnes
         ) * 100
+
     else:
+
         percentage_difference = 0
 
+
     if percentage_difference >= 5:
+
         status = "Above benchmark"
+
     elif percentage_difference <= -5:
+
         status = "Below benchmark"
+
     else:
+
         status = "Near benchmark"
 
+
     return {
+
         "available": True,
+
         "district": district,
+
         "crop": crop,
+
         "season": season,
-        "benchmark_yield": round(benchmark_tonnes, 3),
-        "benchmark_original_value": benchmark_value,
+
+        "benchmark_yield": round(
+            benchmark_tonnes,
+            3
+        ),
+
+        "benchmark_original_value": (
+            benchmark_value
+        ),
+
         "benchmark_unit": unit,
-        "predicted_yield": round(predicted_yield, 3),
-        "difference": round(difference, 3),
+
+        "predicted_yield": round(
+            predicted_yield,
+            3
+        ),
+
+        "difference": round(
+            difference,
+            3
+        ),
+
         "percentage_difference": round(
             percentage_difference,
             2
         ),
+
         "status": status,
+
         "year": "2024-25"
     }
 
@@ -451,6 +638,7 @@ def compare_with_benchmark(
 # ============================================================
 
 COST_PER_HECTARE = {
+
     "rice": 93687,
     "paddy": 93687,
 
@@ -476,6 +664,7 @@ COST_PER_HECTARE = {
 
 
 REFERENCE_PRICE_PER_TONNE = {
+
     "rice": 24410,
     "paddy": 24410,
 
@@ -501,6 +690,7 @@ REFERENCE_PRICE_PER_TONNE = {
 
 
 PRICE_SOURCE_NAME = {
+
     "rice": "MSP Paddy Common",
     "paddy": "MSP Paddy Common",
 
@@ -525,52 +715,117 @@ PRICE_SOURCE_NAME = {
 }
 
 
-def calculate_roi(crop, predicted_yield, area):
+def calculate_roi(
+    crop,
+    predicted_yield,
+    area
+):
+
     crop_key = normalize_text(crop)
 
-    cost_per_hectare = COST_PER_HECTARE.get(crop_key)
-    price_per_tonne = REFERENCE_PRICE_PER_TONNE.get(crop_key)
+
+    cost_per_hectare = (
+        COST_PER_HECTARE.get(crop_key)
+    )
+
+    price_per_tonne = (
+        REFERENCE_PRICE_PER_TONNE.get(crop_key)
+    )
+
 
     if cost_per_hectare is None:
+
         return {
             "available": False,
             "message": (
-                f"ROI cost data is not currently available for "
-                f"{crop}."
+                f"ROI cost data is not currently "
+                f"available for {crop}."
             )
         }
+
 
     if price_per_tonne is None:
+
         return {
             "available": False,
             "message": (
-                f"Reference price is not currently available for "
-                f"{crop}."
+                f"Reference price is not currently "
+                f"available for {crop}."
             )
         }
 
-    total_cost = cost_per_hectare * area
 
-    total_production = predicted_yield * area
+    # Total cultivation cost
 
-    revenue = total_production * 1000 * price_per_tonne
+    total_cost = (
+        cost_per_hectare * area
+    )
 
-    profit = revenue - total_cost
+
+    # Model yield is already tonnes/hectare.
+    # Therefore this is tonnes.
+
+    total_production = (
+        predicted_yield * area
+    )
+
+
+    # price_per_tonne is ₹/tonne.
+    #
+    # IMPORTANT:
+    # Do NOT multiply by 1000 here.
+    #
+    # Previous version incorrectly used:
+    # total_production * 1000 * price_per_tonne
+    #
+    # That caused the extremely large ROI values.
+
+    revenue = (
+        total_production *
+        price_per_tonne
+    )
+
+
+    profit = (
+        revenue -
+        total_cost
+    )
+
 
     if total_cost != 0:
+
         roi_percentage = (
-            profit / total_cost
+            profit /
+            total_cost
         ) * 100
+
     else:
+
         roi_percentage = 0
 
-    status = "Profitable" if profit >= 0 else "Loss"
+
+    status = (
+        "Profitable"
+        if profit >= 0
+        else "Loss"
+    )
+
 
     return {
+
         "available": True,
+
         "crop": crop,
-        "predicted_yield": round(predicted_yield, 3),
-        "area": round(area, 3),
+
+        "predicted_yield": round(
+            predicted_yield,
+            3
+        ),
+
+        "area": round(
+            area,
+            3
+        ),
 
         "cost_per_hectare": round(
             cost_per_hectare,
@@ -587,9 +842,11 @@ def calculate_roi(crop, predicted_yield, area):
             2
         ),
 
-        "price_source": PRICE_SOURCE_NAME.get(
-            crop_key,
-            "Published reference price"
+        "price_source": (
+            PRICE_SOURCE_NAME.get(
+                crop_key,
+                "Published reference price"
+            )
         ),
 
         "total_production_tonnes": round(
@@ -628,121 +885,173 @@ def get_fertilizer_recommendation(
     crop_type,
     year
 ):
-    """
-    Safely connect the Flask application with the existing
-    fertilizer recommender.
 
-    The recommender itself remains in src/.
     """
+    Connect Flask to the existing
+    FertilizerRecommender class.
+
+    The actual recommender API is:
+
+        FertilizerRecommender().recommend(...)
+
+    It uses:
+
+        fertilizer/final_soil_profiles.csv
+        fertilizer/fertilizer_knowledge_base.csv
+    """
+
+
+    global FERTILIZER_RECOMMENDER
+
 
     try:
-        import fertilizer_recommender
 
-    except Exception as exc:
-        return {
-            "available": False,
-            "message": (
-                "Fertilizer recommendation module could not "
-                f"be loaded: {exc}"
-            )
-        }
-
-    possible_functions = [
-        "recommend_fertilizer",
-        "get_recommendation",
-        "recommend"
-    ]
-
-    function = None
-
-    for function_name in possible_functions:
-        if hasattr(
-            fertilizer_recommender,
-            function_name
-        ):
-            function = getattr(
-                fertilizer_recommender,
-                function_name
-            )
-            break
-
-    if function is None:
-        return {
-            "available": False,
-            "message": (
-                "Fertilizer recommender function is not "
-                "exposed by fertilizer_recommender.py yet."
-            )
-        }
-
-    try:
-        # Try keyword arguments first
-        result = function(
-            district=district,
-            block=block,
-            village=village,
-            crop=crop,
-            crop_type=crop_type,
-            year=year
+        from fertilizer_recommender import (
+            FertilizerRecommender
         )
 
-        if result is None:
-            return {
-                "available": False,
-                "message": "No fertilizer recommendation returned."
-            }
-
-        # Normalize the result into JSON-safe data
-        if isinstance(result, dict):
-            result = dict(result)
-
-            if "available" not in result:
-                result["available"] = True
-
-            return result
+    except Exception as exc:
 
         return {
-            "available": True,
-            "recommendation": str(result)
+            "available": False,
+            "message": (
+                "Fertilizer recommendation module "
+                f"could not be loaded: {exc}"
+            )
         }
 
-    except TypeError:
-        # Some existing implementations may have a different
-        # function signature. Try positional arguments.
 
-        try:
-            result = function(
-                district,
-                block,
-                village,
-                crop,
-                crop_type,
-                year
+    try:
+
+        # Create the recommender once and reuse it.
+
+        if FERTILIZER_RECOMMENDER is None:
+
+            FERTILIZER_RECOMMENDER = (
+                FertilizerRecommender()
             )
 
-            if isinstance(result, dict):
-                result = dict(result)
 
-                if "available" not in result:
-                    result["available"] = True
+        result = (
+            FERTILIZER_RECOMMENDER.recommend(
+                district=district,
+                block=block or None,
+                crop=crop,
+                variety_or_type=(
+                    crop_type or None
+                ),
+                village=village or None,
+                year=year
+            )
+        )
 
-                return result
 
-            return {
-                "available": True,
-                "recommendation": str(result)
-            }
+        if not isinstance(result, dict):
 
-        except Exception as exc:
             return {
                 "available": False,
                 "message": (
-                    "Fertilizer recommendation failed: "
-                    f"{exc}"
+                    "No fertilizer recommendation "
+                    "returned."
                 )
             }
 
+
+        # Copy result so we do not modify the
+        # recommender's original dictionary.
+
+        normalized = dict(result)
+
+
+        # ----------------------------------------------------
+        # Availability
+        # ----------------------------------------------------
+
+        recommendation_available = bool(
+            result.get(
+                "recommendation_available",
+                False
+            )
+        )
+
+
+        normalized["available"] = (
+            recommendation_available
+        )
+
+
+        # ----------------------------------------------------
+        # Frontend-friendly NPK aliases
+        # ----------------------------------------------------
+
+        normalized["n"] = result.get(
+            "nitrogen_kg_per_ha"
+        )
+
+        normalized["p2o5"] = result.get(
+            "phosphorus_kg_per_ha"
+        )
+
+        normalized["k2o"] = result.get(
+            "potassium_kg_per_ha"
+        )
+
+
+        normalized["nitrogen"] = result.get(
+            "nitrogen_kg_per_ha"
+        )
+
+        normalized["phosphorus"] = result.get(
+            "phosphorus_kg_per_ha"
+        )
+
+        normalized["potassium"] = result.get(
+            "potassium_kg_per_ha"
+        )
+
+
+        # ----------------------------------------------------
+        # Soil information
+        # ----------------------------------------------------
+
+        normalized["soil_status"] = (
+            result.get(
+                "soil_summary",
+                {}
+            )
+        )
+
+
+        # ----------------------------------------------------
+        # Useful message
+        # ----------------------------------------------------
+
+        normalized["message"] = (
+
+            result.get(
+                "applicability_reason"
+            )
+
+            or result.get(
+                "soil_message"
+            )
+
+            or result.get(
+                "message"
+            )
+
+            or (
+                "Fertilizer recommendation "
+                "generated."
+            )
+        )
+
+
+        return normalized
+
+
     except Exception as exc:
+
         return {
             "available": False,
             "message": (
@@ -757,6 +1066,7 @@ def get_fertilizer_recommendation(
 # ============================================================
 
 def validate_prediction_input(data):
+
     required_fields = [
         "district",
         "crop",
@@ -765,35 +1075,74 @@ def validate_prediction_input(data):
         "area"
     ]
 
+
     missing = []
 
+
     for field in required_fields:
+
         value = data.get(field)
 
-        if value is None or str(value).strip() == "":
+        if (
+            value is None
+            or str(value).strip() == ""
+        ):
+
             missing.append(field)
 
+
     if missing:
-        return False, (
+
+        return (
+            False,
             "Missing required fields: "
             + ", ".join(missing)
         )
 
+
     try:
-        year = int(data["year"])
+
+        year = int(
+            data["year"]
+        )
+
     except (ValueError, TypeError):
-        return False, "Year must be a valid integer."
+
+        return (
+            False,
+            "Year must be a valid integer."
+        )
+
 
     if year < 1997 or year > 2100:
-        return False, "Please enter a valid year."
+
+        return (
+            False,
+            "Please enter a valid year."
+        )
+
 
     try:
-        area = float(data["area"])
+
+        area = float(
+            data["area"]
+        )
+
     except (ValueError, TypeError):
-        return False, "Area must be a valid number."
+
+        return (
+            False,
+            "Area must be a valid number."
+        )
+
 
     if area <= 0:
-        return False, "Area must be greater than zero."
+
+        return (
+            False,
+            "Area must be greater than zero."
+        )
+
 
     return True, ""
 
@@ -813,6 +1162,7 @@ def index():
         .tolist()
     )
 
+
     crops = sorted(
         YIELD_DF["crop"]
         .dropna()
@@ -821,6 +1171,7 @@ def index():
         .tolist()
     )
 
+
     seasons = sorted(
         YIELD_DF["season"]
         .dropna()
@@ -828,6 +1179,7 @@ def index():
         .unique()
         .tolist()
     )
+
 
     return render_template(
         "index.html",
@@ -838,177 +1190,344 @@ def index():
 
 
 # ============================================================
+# RESULT PAGE
+# ============================================================
+
+@app.route("/result")
+def result():
+
+    """
+    Display the prediction result page.
+
+    result.html receives the actual prediction
+    data through the URL query parameter:
+        ?data=...
+    """
+
+    return render_template(
+        "result.html"
+    )
+
+
+# ============================================================
 # PREDICTION
 # ============================================================
 
-@app.route("/predict", methods=["POST"])
+@app.route(
+    "/predict",
+    methods=["POST"]
+)
 def predict():
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    )
+
 
     if data is None:
+
         data = request.form.to_dict()
 
-    valid, error_message = validate_prediction_input(data)
+
+    # --------------------------------------------------------
+    # Validate input
+    # --------------------------------------------------------
+
+    valid, error_message = (
+        validate_prediction_input(data)
+    )
+
 
     if not valid:
+
         return jsonify({
+
             "success": False,
+
             "error": error_message
+
         }), 400
 
-    district = str(data["district"]).strip()
-    crop = str(data["crop"]).strip()
-    season = str(data["season"]).strip()
 
-    year = int(data["year"])
-    area = float(data["area"])
+    district = str(
+        data["district"]
+    ).strip()
 
-    # --------------------------------------------------------
-    # Model prediction
-    # --------------------------------------------------------
+    crop = str(
+        data["crop"]
+    ).strip()
 
-    prediction_input = pd.DataFrame([{
-        "district": district,
-        "crop": crop,
-        "season": season,
-        "year": year,
-        "area": area
-    }])
+    season = str(
+        data["season"]
+    ).strip()
 
-    try:
-        predicted_yield = float(
-            MODEL.predict(prediction_input)[0]
-        )
-
-    except Exception as exc:
-        return jsonify({
-            "success": False,
-            "error": (
-                "Model prediction failed: "
-                f"{exc}"
-            )
-        }), 500
-
-    # Model target is tonnes/ha.
-    predicted_yield = max(
-        predicted_yield,
-        0
+    year = int(
+        data["year"]
     )
 
-    # --------------------------------------------------------
-    # Benchmark
-    # --------------------------------------------------------
-
-    benchmark = compare_with_benchmark(
-        district=district,
-        crop=crop,
-        season=season,
-        predicted_yield=predicted_yield
+    area = float(
+        data["area"]
     )
 
-    # --------------------------------------------------------
-    # ROI
-    # --------------------------------------------------------
-
-    roi = calculate_roi(
-        crop=crop,
-        predicted_yield=predicted_yield,
-        area=area
-    )
 
     # --------------------------------------------------------
-    # Fertilizer
+    # Optional fertilizer fields
     # --------------------------------------------------------
 
     block = str(
         data.get("block", "")
     ).strip()
 
+
     village = str(
         data.get("village", "")
     ).strip()
+
 
     crop_type = str(
         data.get("crop_type", "")
     ).strip()
 
-    fertilizer = get_fertilizer_recommendation(
-        district=district,
-        block=block,
-        village=village,
-        crop=crop,
-        crop_type=crop_type,
-        year=year
+
+    # --------------------------------------------------------
+    # Model prediction
+    # --------------------------------------------------------
+
+    prediction_input = pd.DataFrame([{
+
+        "district": district,
+
+        "crop": crop,
+
+        "season": season,
+
+        "year": year,
+
+        "area": area
+
+    }])
+
+
+    try:
+
+        predicted_yield = float(
+            MODEL.predict(
+                prediction_input
+            )[0]
+        )
+
+    except Exception as exc:
+
+        return jsonify({
+
+            "success": False,
+
+            "error": (
+                "Model prediction failed: "
+                f"{exc}"
+            )
+
+        }), 500
+
+
+    # Model target is tonnes/hectare.
+
+    predicted_yield = max(
+        predicted_yield,
+        0
     )
 
+
     # --------------------------------------------------------
-    # Model metrics
+    # Benchmark
+    # --------------------------------------------------------
+
+    benchmark = (
+        compare_with_benchmark(
+            district=district,
+            crop=crop,
+            season=season,
+            predicted_yield=predicted_yield
+        )
+    )
+
+
+    # --------------------------------------------------------
+    # ROI
+    # --------------------------------------------------------
+
+    roi = calculate_roi(
+
+        crop=crop,
+
+        predicted_yield=(
+            predicted_yield
+        ),
+
+        area=area
+
+    )
+
+
+    # --------------------------------------------------------
+    # Fertilizer
+    # --------------------------------------------------------
+
+    fertilizer = (
+        get_fertilizer_recommendation(
+
+            district=district,
+
+            block=block,
+
+            village=village,
+
+            crop=crop,
+
+            crop_type=crop_type,
+
+            year=year
+
+        )
+    )
+
+
+    # ========================================================
+    # TERMINAL MODEL PERFORMANCE
+    # ========================================================
+
     # IMPORTANT:
-    # Accuracy remains TERMINAL ONLY.
-    # --------------------------------------------------------
+    # Model performance is intentionally NOT
+    # sent to the website/report.
 
-    print("\n" + "=" * 60)
-    print("YIELDROI PREDICTION")
-    print("=" * 60)
+    print(
+        "\n" + "=" * 60
+    )
 
-    print(f"District        : {district}")
-    print(f"Crop            : {crop}")
-    print(f"Season          : {season}")
-    print(f"Year            : {year}")
-    print(f"Area            : {area} ha")
+    print(
+        "YIELDROI PREDICTION"
+    )
+
+    print(
+        "=" * 60
+    )
+
+
+    print(
+        f"District        : {district}"
+    )
+
+    print(
+        f"Crop            : {crop}"
+    )
+
+    print(
+        f"Season          : {season}"
+    )
+
+    print(
+        f"Year            : {year}"
+    )
+
+    print(
+        f"Area            : {area} ha"
+    )
+
 
     print(
         f"Predicted Yield : "
         f"{predicted_yield:.3f} tonnes/ha"
     )
 
-    if MODEL_METRICS:
-        print("\nMODEL PERFORMANCE")
 
-        # Try several possible metric structures
-        test_metrics = MODEL_METRICS.get(
-            "test",
+    if MODEL_METRICS:
+
+        print(
+            "\nMODEL PERFORMANCE"
+        )
+
+
+        test_metrics = (
             MODEL_METRICS.get(
-                "Test",
-                MODEL_METRICS
+                "test",
+                MODEL_METRICS.get(
+                    "Test",
+                    MODEL_METRICS
+                )
             )
         )
 
-        if isinstance(test_metrics, dict):
+
+        if isinstance(
+            test_metrics,
+            dict
+        ):
 
             r2 = test_metrics.get(
+
                 "r2",
+
                 test_metrics.get(
+
                     "R2",
-                    test_metrics.get("test_r2")
+
+                    test_metrics.get(
+                        "test_r2"
+                    )
+
                 )
+
             )
+
 
             mae = test_metrics.get(
+
                 "mae",
+
                 test_metrics.get(
+
                     "MAE",
-                    test_metrics.get("test_mae")
+
+                    test_metrics.get(
+                        "test_mae"
+                    )
+
                 )
+
             )
+
 
             rmse = test_metrics.get(
+
                 "rmse",
+
                 test_metrics.get(
+
                     "RMSE",
-                    test_metrics.get("test_rmse")
+
+                    test_metrics.get(
+                        "test_rmse"
+                    )
+
                 )
+
             )
 
+
             if r2 is not None:
+
                 try:
-                    r2_value = float(r2)
+
+                    r2_value = float(
+                        r2
+                    )
+
 
                     print(
                         f"Test R²        : "
                         f"{r2_value:.4f}"
                     )
+
 
                     print(
                         f"Variance "
@@ -1016,14 +1535,30 @@ def predict():
                         f"{r2_value * 100:.2f}%"
                     )
 
-                except (ValueError, TypeError):
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
                     pass
 
+
             if mae is not None:
-                print(f"Test MAE        : {mae}")
+
+                print(
+                    f"Test MAE        : "
+                    f"{mae}"
+                )
+
 
             if rmse is not None:
-                print(f"Test RMSE       : {rmse}")
+
+                print(
+                    f"Test RMSE       : "
+                    f"{rmse}"
+                )
+
 
             print(
                 "Note             : "
@@ -1031,45 +1566,71 @@ def predict():
                 "not classification accuracy."
             )
 
-    print("=" * 60 + "\n")
 
-    # --------------------------------------------------------
-    # Final response
-    # --------------------------------------------------------
+    print(
+        "=" * 60 + "\n"
+    )
+
+
+    # ========================================================
+    # FINAL RESPONSE
+    # ========================================================
 
     result = {
+
         "success": True,
 
+
         "input": {
+
             "district": district,
+
             "crop": crop,
+
             "season": season,
+
             "year": year,
+
             "area": area,
+
             "block": block,
+
             "village": village,
+
             "crop_type": crop_type
+
         },
 
+
         "prediction": {
+
             "yield_tonnes_per_hectare": round(
                 predicted_yield,
                 3
             ),
+
             "total_production_tonnes": round(
                 predicted_yield * area,
                 3
             )
+
         },
+
 
         "benchmark": benchmark,
 
+
         "roi": roi,
 
+
         "fertilizer": fertilizer
+
     }
 
-    return jsonify(result)
+
+    return jsonify(
+        result
+    )
 
 
 # ============================================================
@@ -1078,12 +1639,17 @@ def predict():
 
 @app.route("/report")
 def report():
+
     """
-    The report page receives prediction data through
-    the query string from result.html.
+    Printable report page.
+
+    report.html receives prediction data
+    through the URL query parameter.
     """
 
-    return render_template("report.html")
+    return render_template(
+        "report.html"
+    )
 
 
 # ============================================================
@@ -1094,14 +1660,35 @@ def report():
 def health():
 
     return jsonify({
+
         "status": "ok",
+
         "project": "YieldROI",
-        "yield_data": YIELD_DATA_PATH.exists(),
-        "benchmark_data": BENCHMARK_PATH.exists(),
-        "model": MODEL_PATH.exists(),
-        "metrics": METRICS_PATH.exists(),
-        "soil_profiles": SOIL_PROFILE_PATH.exists(),
-        "fertilizer_kb": FERTILIZER_KB_PATH.exists()
+
+        "yield_data": (
+            YIELD_DATA_PATH.exists()
+        ),
+
+        "benchmark_data": (
+            BENCHMARK_PATH.exists()
+        ),
+
+        "model": (
+            MODEL_PATH.exists()
+        ),
+
+        "metrics": (
+            METRICS_PATH.exists()
+        ),
+
+        "soil_profiles": (
+            SOIL_PROFILE_PATH.exists()
+        ),
+
+        "fertilizer_kb": (
+            FERTILIZER_KB_PATH.exists()
+        )
+
     })
 
 
@@ -1111,45 +1698,104 @@ def health():
 
 if __name__ == "__main__":
 
-    print("\n" + "=" * 60)
-    print("YieldROI")
-    print("=" * 60)
+    print(
+        "\n" + "=" * 60
+    )
 
-    print(f"Project root : {PROJECT_ROOT}")
-    print(f"Yield data   : {YIELD_DATA_PATH}")
-    print(f"Benchmark    : {BENCHMARK_PATH}")
-    print(f"Model        : {MODEL_PATH}")
-    print(f"Templates    : {TEMPLATES_DIR}")
-    print(f"Static       : {STATIC_DIR}")
+    print(
+        "YieldROI"
+    )
 
-    print("\nFiles:")
+    print(
+        "=" * 60
+    )
+
+
+    print(
+        f"Project root : "
+        f"{PROJECT_ROOT}"
+    )
+
+    print(
+        f"Yield data   : "
+        f"{YIELD_DATA_PATH}"
+    )
+
+    print(
+        f"Benchmark    : "
+        f"{BENCHMARK_PATH}"
+    )
+
+    print(
+        f"Model        : "
+        f"{MODEL_PATH}"
+    )
+
+    print(
+        f"Templates    : "
+        f"{TEMPLATES_DIR}"
+    )
+
+    print(
+        f"Static       : "
+        f"{STATIC_DIR}"
+    )
+
+
+    print(
+        "\nFiles:"
+    )
+
+
     print(
         f"  Yield data : "
         f"{'FOUND' if YIELD_DATA_PATH.exists() else 'MISSING'}"
     )
+
+
     print(
         f"  Benchmark  : "
         f"{'FOUND' if BENCHMARK_PATH.exists() else 'MISSING'}"
     )
+
+
     print(
         f"  Model      : "
         f"{'FOUND' if MODEL_PATH.exists() else 'MISSING'}"
     )
+
+
     print(
         f"  Templates  : "
         f"{'FOUND' if TEMPLATES_DIR.exists() else 'MISSING'}"
     )
+
+
     print(
         f"  Static     : "
         f"{'FOUND' if STATIC_DIR.exists() else 'MISSING'}"
     )
 
-    print("\nStarting server...")
-    print("Open: http://127.0.0.1:5000")
-    print("=" * 60 + "\n")
+
+    print(
+        "\nStarting server..."
+    )
+
+    print(
+        "Open: http://127.0.0.1:5000"
+    )
+
+    print(
+        "=" * 60 + "\n"
+    )
+
 
     app.run(
+
         host="127.0.0.1",
+
         port=5000,
+
         debug=True
+
     )

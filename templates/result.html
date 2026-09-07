@@ -1,913 +1,2477 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
-    <title>
-        YieldROI | Prediction Result
-    </title>
+    <title>YieldROI - Crop Result</title>
 
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
+        href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+
+        /* =====================================================
+           RESULT PAGE
+           ===================================================== */
+
+        .result-page {
+
+            min-height: 100vh;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #eef7f1 0%,
+                    #f7f5ec 100%
+                );
+
+        }
+
+
+        .result-header {
+
+            position: relative;
+
+            background:
+                rgba(255,255,255,0.92);
+
+            border-bottom:
+                1px solid #e2ebe5;
+
+            box-shadow:
+                0 5px 25px rgba(24,75,54,0.05);
+
+        }
+
+
+        .result-container {
+
+            width: 100%;
+
+            max-width: 1100px;
+
+            margin: auto;
+
+            padding:
+                65px 25px 90px;
+
+        }
+
+
+        /* =====================================================
+           RESULT INTRO
+           ===================================================== */
+
+        .result-intro {
+
+            text-align: center;
+
+            margin-bottom: 40px;
+
+        }
+
+
+        .result-kicker {
+
+            color: #23734c;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            letter-spacing: 2.5px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .result-intro h1 {
+
+            color: #174b36;
+
+            font-size:
+                clamp(38px, 5vw, 58px);
+
+            line-height: 1.1;
+
+            letter-spacing: -2px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .result-intro p {
+
+            color: #61746a;
+
+            font-size: 18px;
+
+        }
+
+
+        /* =====================================================
+           MAIN RESULT CARD
+           ===================================================== */
+
+        .main-result-card {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #174b36,
+                    #267a51
+                );
+
+            color: white;
+
+            border-radius: 26px;
+
+            padding: 38px 42px;
+
+            box-shadow:
+                0 22px 55px rgba(23,75,54,0.18);
+
+            display: grid;
+
+            grid-template-columns:
+                1.4fr 1fr 1fr 1fr;
+
+            gap: 25px;
+
+            align-items: center;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        .main-yield {
+
+            border-right:
+                1px solid rgba(255,255,255,0.20);
+
+            padding-right: 25px;
+
+        }
+
+
+        .main-yield-label {
+
+            display: block;
+
+            font-size: 14px;
+
+            opacity: 0.80;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .main-yield-value {
+
+            display: block;
+
+            font-size: 52px;
+
+            line-height: 1;
+
+            font-weight: 700;
+
+            letter-spacing: -2px;
+
+        }
+
+
+        .main-yield-unit {
+
+            display: block;
+
+            margin-top: 8px;
+
+            font-size: 14px;
+
+            opacity: 0.78;
+
+        }
+
+
+        .result-meta {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 4px;
+
+        }
+
+
+        .result-meta span {
+
+            font-size: 13px;
+
+            opacity: 0.72;
+
+        }
+
+
+        .result-meta strong {
+
+            font-size: 18px;
+
+            font-weight: 600;
+
+        }
+
+
+        /* =====================================================
+           ANALYSIS GRID
+           ===================================================== */
+
+        .analysis-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 25px;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .analysis-card {
+
+            background: white;
+
+            border:
+                1px solid #e1e9e4;
+
+            border-radius: 22px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 12px 35px rgba(24,75,54,0.07);
+
+        }
+
+
+        .analysis-card-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .analysis-icon {
+
+            width: 43px;
+
+            height: 43px;
+
+            border-radius: 13px;
+
+            background: #edf7f0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 21px;
+
+        }
+
+
+        .analysis-card-header h2 {
+
+            color: #174b36;
+
+            font-size: 20px;
+
+            margin: 0;
+
+        }
+
+
+        .analysis-card-header p {
+
+            color: #7a8a82;
+
+            font-size: 13px;
+
+            margin-top: 2px;
+
+        }
+
+
+        /* =====================================================
+           BENCHMARK
+           ===================================================== */
+
+        .benchmark-status {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            padding: 7px 13px;
+
+            border-radius: 30px;
+
+            background: #eaf6ed;
+
+            color: #23734c;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            margin-bottom: 22px;
+
+        }
+
+
+        .benchmark-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 18px;
+
+        }
+
+
+        .metric-box {
+
+            padding: 17px;
+
+            border-radius: 14px;
+
+            background: #f7f9f7;
+
+        }
+
+
+        .metric-box span {
+
+            display: block;
+
+            color: #718178;
+
+            font-size: 13px;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .metric-box strong {
+
+            display: block;
+
+            color: #193d2d;
+
+            font-size: 19px;
+
+        }
+
+
+        .benchmark-message {
+
+            color: #718178;
+
+            font-size: 13px;
+
+            margin-top: 20px;
+
+            line-height: 1.5;
+
+        }
+
+
+        /* =====================================================
+           ECONOMIC
+           ===================================================== */
+
+        .roi-highlight {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #edf8ef,
+                    #f7faf4
+                );
+
+            border:
+                1px solid #d8eadc;
+
+            border-radius: 17px;
+
+            padding: 20px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .roi-label {
+
+            display: block;
+
+            color: #64776c;
+
+            font-size: 13px;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .roi-value {
+
+            display: block;
+
+            color: #174b36;
+
+            font-size: 38px;
+
+            font-weight: 700;
+
+        }
+
+
+        .roi-status {
+
+            display: block;
+
+            color: #3c7152;
+
+            font-size: 13px;
+
+            margin-top: 2px;
+
+        }
+
+
+        .economic-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 13px;
+
+        }
+
+
+        .economic-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding-bottom: 12px;
+
+            border-bottom:
+                1px solid #edf0ed;
+
+        }
+
+
+        .economic-row:last-child {
+
+            border-bottom: none;
+
+        }
+
+
+        .economic-row span {
+
+            color: #718178;
+
+            font-size: 14px;
+
+        }
+
+
+        .economic-row strong {
+
+            color: #193d2d;
+
+            font-size: 15px;
+
+            text-align: right;
+
+        }
+
+
+        /* =====================================================
+           FERTILIZER
+           ===================================================== */
+
+        .fertilizer-card {
+
+            background: white;
+
+            border:
+                1px solid #e1e9e4;
+
+            border-radius: 22px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 12px 35px rgba(24,75,54,0.07);
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .fertilizer-values {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 18px;
+
+            margin-top: 22px;
+
+        }
+
+
+        .fertilizer-value {
+
+            text-align: center;
+
+            background: #f7f9f7;
+
+            border-radius: 15px;
+
+            padding: 20px;
+
+        }
+
+
+        .fertilizer-value span {
+
+            display: block;
+
+            color: #23734c;
+
+            font-weight: 700;
+
+            font-size: 15px;
+
+        }
+
+
+        .fertilizer-value strong {
+
+            display: block;
+
+            color: #174b36;
+
+            font-size: 28px;
+
+            margin-top: 4px;
+
+        }
+
+
+        .fertilizer-value small {
+
+            color: #718178;
+
+            font-size: 12px;
+
+        }
+
+
+        .fertilizer-message {
+
+            color: #61746a;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+
+        }
+
+
+        .soil-info {
+
+            margin-top: 25px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid #e9eeeb;
+
+        }
+
+
+        .soil-info-title {
+
+            color: #174b36;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            margin-bottom: 13px;
+
+        }
+
+
+        .soil-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 10px;
+
+        }
+
+
+        .soil-item {
+
+            background: #f7f9f7;
+
+            border-radius: 10px;
+
+            padding: 10px;
+
+        }
+
+
+        .soil-item span {
+
+            display: block;
+
+            color: #78877f;
+
+            font-size: 11px;
+
+        }
+
+
+        .soil-item strong {
+
+            display: block;
+
+            color: #284d3a;
+
+            font-size: 13px;
+
+            margin-top: 2px;
+
+        }
+
+
+        /* =====================================================
+           ACTIONS
+           ===================================================== */
+
+        .result-actions {
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-top: 40px;
+
+        }
+
+
+        .action-button {
+
+            min-width: 190px;
+
+            height: 55px;
+
+            border-radius: 13px;
+
+            padding: 0 25px;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            border: none;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+
+        }
+
+
+        .primary-action {
+
+            background: #174b36;
+
+            color: white;
+
+        }
+
+
+        .primary-action:hover {
+
+            background: #23734c;
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 10px 25px rgba(23,75,54,0.18);
+
+        }
+
+
+        .secondary-action {
+
+            background: white;
+
+            color: #174b36;
+
+            border:
+                1px solid #d4e0d9;
+
+        }
+
+
+        .secondary-action:hover {
+
+            background: #f3f7f4;
+
+            transform:
+                translateY(-2px);
+
+        }
+
+
+        /* =====================================================
+           ERROR
+           ===================================================== */
+
+        .result-error {
+
+            max-width: 650px;
+
+            margin: 100px auto;
+
+            text-align: center;
+
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 45px;
+
+            box-shadow: var(--shadow);
+
+        }
+
+
+        .result-error h2 {
+
+            color: #174b36;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .result-error p {
+
+            color: #718178;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        /* =====================================================
+           TAMIL
+           ===================================================== */
+
+        body.tamil-mode
+        .result-intro h1 {
+
+            letter-spacing: -1px;
+
+        }
+
+
+        body.tamil-mode
+        .analysis-card-header h2 {
+
+            letter-spacing: 0;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 850px) {
+
+            .main-result-card {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+            }
+
+
+            .main-yield {
+
+                grid-column:
+                    1 / -1;
+
+                border-right: none;
+
+                border-bottom:
+                    1px solid rgba(255,255,255,0.20);
+
+                padding-right: 0;
+
+                padding-bottom: 20px;
+
+            }
+
+
+            .analysis-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .soil-grid {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .result-container {
+
+                padding:
+                    45px 17px 70px;
+
+            }
+
+
+            .main-result-card {
+
+                grid-template-columns:
+                    1fr;
+
+                padding: 28px;
+
+            }
+
+
+            .main-yield {
+
+                grid-column: auto;
+
+            }
+
+
+            .benchmark-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .fertilizer-values {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .soil-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+            }
+
+
+            .result-actions {
+
+                flex-direction: column;
+
+            }
+
+
+            .action-button {
+
+                width: 100%;
+
+            }
+
+        }
+
+    </style>
 
 </head>
 
+
 <body class="result-page">
 
-<header class="site-header">
 
-    <div class="header-inner">
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
-        <a href="/" class="brand">
+    <header class="main-header result-header">
 
-            <span class="brand-mark">
+        <div class="logo-area">
 
-                <svg viewBox="0 0 48 48">
+            <div class="logo-mark">
+                🌿
+            </div>
 
-                    <path
-                        d="M24 42C23 31 23 19 25 7"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="4"
-                        stroke-linecap="round"
-                    />
+            <div>
 
-                    <path
-                        d="M24 28C14 28 8 23 7 14c9-1 16 3 17 14Z"
-                        fill="currentColor"
-                    />
+                <div class="logo-name">
+                    YieldROI
+                </div>
 
-                    <path
-                        d="M25 21C26 11 33 6 42 7c0 9-6 15-17 14Z"
-                        fill="currentColor"
-                    />
+                <div class="logo-tagline">
 
-                </svg>
+                    <span class="language-en">
+                        Smart Agriculture
+                    </span>
 
-            </span>
+                    <span class="language-ta">
+                        நுண்ணறிவு வேளாண்மை
+                    </span>
 
-            <span class="brand-text">
-                YieldROI
-            </span>
+                </div>
 
-        </a>
+            </div>
 
-
-        <nav class="main-nav">
-
-            <a
-                href="/"
-                data-en="Home"
-                data-ta="முகப்பு"
-            >
-                Home
-            </a>
-
-            <a
-                href="/#features"
-                data-en="Features"
-                data-ta="அம்சங்கள்"
-            >
-                Features
-            </a>
-
-            <a
-                href="/#methodology"
-                data-en="Method"
-                data-ta="முறை"
-            >
-                Method
-            </a>
-
-        </nav>
+        </div>
 
 
         <button
             type="button"
             class="language-switch"
             id="languageSwitch"
-        >
+            onclick="toggleResultLanguage()">
+
             தமிழ்
+
         </button>
 
-    </div>
-
-</header>
+    </header>
 
 
-<main class="result-main">
+    <!-- =====================================================
+         RESULT CONTENT
+         ===================================================== -->
 
-    <section class="result-header">
+    <main class="result-container">
 
-        <div>
 
-            <span class="section-label">
-                YIELDROI RESULT
-            </span>
+        <!-- =================================================
+             INTRO
+             ================================================= -->
 
-            <h1
-                data-en="Your crop analysis"
-                data-ta="உங்கள் பயிர் பகுப்பாய்வு"
-            >
-                Your crop analysis
+        <section class="result-intro">
+
+            <div class="result-kicker">
+
+                <span class="language-en">
+                    YIELDROI ANALYSIS
+                </span>
+
+                <span class="language-ta">
+                    YIELDROI பகுப்பாய்வு
+                </span>
+
+            </div>
+
+
+            <h1>
+
+                <span class="language-en">
+                    Your crop result
+                </span>
+
+                <span class="language-ta">
+                    உங்கள் பயிர் முடிவு
+                </span>
+
             </h1>
 
-            <p
-                data-en="Here is the complete prediction, official benchmark comparison and scenario economic analysis."
-                data-ta="கணிப்பு, அதிகாரப்பூர்வ அளவுகோல் ஒப்பீடு மற்றும் மதிப்பிடப்பட்ட பொருளாதார பகுப்பாய்வு இங்கே உள்ளது."
-            >
-                Here is the complete prediction, official benchmark
-                comparison and scenario economic analysis.
+
+            <p>
+
+                <span class="language-en">
+                    Here's what YieldROI found from your inputs.
+                </span>
+
+                <span class="language-ta">
+                    நீங்கள் வழங்கிய தகவல்களின் அடிப்படையில்
+                    YieldROI கண்டறிந்த முடிவுகள் இங்கே.
+                </span>
+
             </p>
 
-        </div>
+        </section>
+
+
+        <!-- =================================================
+             MAIN RESULT
+             ================================================= -->
+
+        <section class="main-result-card">
+
+
+            <div class="main-yield">
+
+                <span class="main-yield-label">
+
+                    <span class="language-en">
+                        Predicted Yield
+                    </span>
+
+                    <span class="language-ta">
+                        கணிக்கப்பட்ட மகசூல்
+                    </span>
+
+                </span>
+
+
+                <strong
+                    class="main-yield-value"
+                    id="resultYield">
+
+                    --
+
+                </strong>
+
+
+                <span class="main-yield-unit">
+
+                    tonnes / hectare
+
+                </span>
+
+            </div>
+
+
+            <div class="result-meta">
+
+                <span>
+
+                    <span class="language-en">
+                        District
+                    </span>
+
+                    <span class="language-ta">
+                        மாவட்டம்
+                    </span>
+
+                </span>
+
+                <strong id="resultDistrict">
+                    --
+                </strong>
+
+            </div>
+
+
+            <div class="result-meta">
+
+                <span>
+
+                    <span class="language-en">
+                        Crop
+                    </span>
+
+                    <span class="language-ta">
+                        பயிர்
+                    </span>
+
+                </span>
+
+                <strong id="resultCrop">
+                    --
+                </strong>
+
+            </div>
+
+
+            <div class="result-meta">
+
+                <span>
+
+                    <span class="language-en">
+                        Season
+                    </span>
+
+                    <span class="language-ta">
+                        பருவம்
+                    </span>
+
+                </span>
+
+                <strong id="resultSeason">
+                    --
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             BENCHMARK + ECONOMIC
+             ================================================= -->
+
+        <section class="analysis-grid">
+
+
+            <!-- =================================================
+                 BENCHMARK CARD
+                 ================================================= -->
+
+            <div class="analysis-card">
+
+                <div class="analysis-card-header">
+
+                    <div class="analysis-icon">
+                        📊
+                    </div>
+
+                    <div>
+
+                        <h2>
+
+                            <span class="language-en">
+                                Official Comparison
+                            </span>
+
+                            <span class="language-ta">
+                                அதிகாரப்பூர்வ ஒப்பீடு
+                            </span>
+
+                        </h2>
+
+                        <p>
+
+                            <span class="language-en">
+                                Compared with 2024-25 official benchmark
+                            </span>
+
+                            <span class="language-ta">
+                                2024-25 அதிகாரப்பூர்வ அளவுகோலுடன் ஒப்பீடு
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="benchmark-status"
+                    id="benchmarkStatus">
+
+                    --
+
+                </div>
+
+
+                <div class="benchmark-grid">
+
+
+                    <div class="metric-box">
+
+                        <span>
+
+                            <span class="language-en">
+                                Predicted Yield
+                            </span>
+
+                            <span class="language-ta">
+                                கணிக்கப்பட்ட மகசூல்
+                            </span>
+
+                        </span>
+
+                        <strong id="benchmarkPredicted">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="metric-box">
+
+                        <span>
+
+                            <span class="language-en">
+                                Official Yield
+                            </span>
+
+                            <span class="language-ta">
+                                அதிகாரப்பூர்வ மகசூல்
+                            </span>
+
+                        </span>
+
+                        <strong id="benchmarkOfficial">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="metric-box">
+
+                        <span>
+
+                            <span class="language-en">
+                                Difference
+                            </span>
+
+                            <span class="language-ta">
+                                வேறுபாடு
+                            </span>
+
+                        </span>
+
+                        <strong id="benchmarkDifference">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="metric-box">
+
+                        <span>
+
+                            <span class="language-en">
+                                Difference %
+                            </span>
+
+                            <span class="language-ta">
+                                வேறுபாடு %
+                            </span>
+
+                        </span>
+
+                        <strong id="benchmarkPercentage">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    class="benchmark-message"
+                    id="benchmarkMessage">
+
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 ECONOMIC CARD
+                 ================================================= -->
+
+            <div class="analysis-card">
+
+                <div class="analysis-card-header">
+
+                    <div class="analysis-icon">
+                        ₹
+                    </div>
+
+                    <div>
+
+                        <h2>
+
+                            <span class="language-en">
+                                Economic Analysis
+                            </span>
+
+                            <span class="language-ta">
+                                பொருளாதார பகுப்பாய்வு
+                            </span>
+
+                        </h2>
+
+                        <p>
+
+                            <span class="language-en">
+                                Scenario-based estimation
+                            </span>
+
+                            <span class="language-ta">
+                                மதிப்பீட்டு அடிப்படையிலான கணிப்பு
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="roi-highlight">
+
+                    <span class="roi-label">
+
+                        <span class="language-en">
+                            Estimated ROI
+                        </span>
+
+                        <span class="language-ta">
+                            மதிப்பிடப்பட்ட ROI
+                        </span>
+
+                    </span>
+
+
+                    <strong
+                        class="roi-value"
+                        id="roiValue">
+
+                        --
+
+                    </strong>
+
+
+                    <span
+                        class="roi-status"
+                        id="roiStatus">
+
+                        --
+
+                    </span>
+
+                </div>
+
+
+                <div class="economic-list">
+
+
+                    <div class="economic-row">
+
+                        <span>
+
+                            <span class="language-en">
+                                Total Cost
+                            </span>
+
+                            <span class="language-ta">
+                                மொத்த செலவு
+                            </span>
+
+                        </span>
+
+                        <strong id="roiCost">
+                            ₹--
+                        </strong>
+
+                    </div>
+
+
+                    <div class="economic-row">
+
+                        <span>
+
+                            <span class="language-en">
+                                Estimated Revenue
+                            </span>
+
+                            <span class="language-ta">
+                                மதிப்பிடப்பட்ட வருவாய்
+                            </span>
+
+                        </span>
+
+                        <strong id="roiRevenue">
+                            ₹--
+                        </strong>
+
+                    </div>
+
+
+                    <div class="economic-row">
+
+                        <span>
+
+                            <span class="language-en">
+                                Profit / Loss
+                            </span>
+
+                            <span class="language-ta">
+                                லாபம் / இழப்பு
+                            </span>
+
+                        </span>
+
+                        <strong id="roiProfit">
+                            ₹--
+                        </strong>
+
+                    </div>
+
+
+                    <div class="economic-row">
+
+                        <span>
+
+                            <span class="language-en">
+                                Reference Price
+                            </span>
+
+                            <span class="language-ta">
+                                குறிப்பு விலை
+                            </span>
+
+                        </span>
+
+                        <strong id="roiPrice">
+                            ₹--
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FERTILIZER
+             ================================================= -->
+
+        <section class="fertilizer-card">
+
+
+            <div class="analysis-card-header">
+
+                <div class="analysis-icon">
+                    🌱
+                </div>
+
+                <div>
+
+                    <h2>
+
+                        <span class="language-en">
+                            Fertilizer Recommendation
+                        </span>
+
+                        <span class="language-ta">
+                            உர பரிந்துரை
+                        </span>
+
+                    </h2>
+
+                    <p>
+
+                        <span class="language-en">
+                            Based on available soil information and fertilizer rules
+                        </span>
+
+                        <span class="language-ta">
+                            கிடைக்கக்கூடிய மண் தகவல்கள் மற்றும் உர விதிகளின் அடிப்படையில்
+                        </span>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p
+                class="fertilizer-message"
+                id="fertilizerMessage">
+
+                Loading recommendation...
+
+            </p>
+
+
+            <div
+                class="fertilizer-values"
+                id="fertilizerValues">
+
+
+                <div class="fertilizer-value">
+
+                    <span>
+                        N
+                    </span>
+
+                    <strong id="fertilizerN">
+                        --
+                    </strong>
+
+                    <small>
+                        kg/ha
+                    </small>
+
+                </div>
+
+
+                <div class="fertilizer-value">
+
+                    <span>
+                        P₂O₅
+                    </span>
+
+                    <strong id="fertilizerP">
+                        --
+                    </strong>
+
+                    <small>
+                        kg/ha
+                    </small>
+
+                </div>
+
+
+                <div class="fertilizer-value">
+
+                    <span>
+                        K₂O
+                    </span>
+
+                    <strong id="fertilizerK">
+                        --
+                    </strong>
+
+                    <small>
+                        kg/ha
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="soil-info"
+                id="soilInfo"
+                style="display:none;">
+
+                <div class="soil-info-title">
+
+                    <span class="language-en">
+                        Soil Information
+                    </span>
+
+                    <span class="language-ta">
+                        மண் தகவல்
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="soil-grid"
+                    id="soilGrid">
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ACTIONS
+             ================================================= -->
 
         <div class="result-actions">
 
-            <a
-                href="/"
-                class="outline-button"
-                data-en="New prediction"
-                data-ta="புதிய கணிப்பு"
-            >
-                New prediction
-            </a>
 
             <button
                 type="button"
-                class="primary-button"
-                id="reportButton"
-            >
-                <span
-                    data-en="View report"
-                    data-ta="அறிக்கையை பார்க்க"
-                >
-                    View report
+                class="action-button secondary-action"
+                onclick="makeAnotherPrediction()">
+
+                <span class="language-en">
+                    Make another prediction
                 </span>
+
+                <span class="language-ta">
+                    மற்றொரு கணிப்பை உருவாக்கவும்
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="action-button primary-action"
+                onclick="openReport()">
+
+                <span class="language-en">
+                    View & Print Report
+                </span>
+
+                <span class="language-ta">
+                    அறிக்கையைப் பார்க்கவும்
+                </span>
+
             </button>
 
         </div>
 
-    </section>
+
+    </main>
 
 
     <!-- =====================================================
-         MAIN RESULT
-    ====================================================== -->
+         JAVASCRIPT
+         ===================================================== -->
 
-    <section class="main-result-card">
-
-        <div class="result-context">
-
-            <div>
-
-                <span
-                    class="small-label"
-                    data-en="District"
-                    data-ta="மாவட்டம்"
-                >
-                    District
-                </span>
-
-                <strong>
-                    {{ result.district }}
-                </strong>
-
-            </div>
+    <script>
 
 
-            <div>
+        // =====================================================
+        // LANGUAGE
+        // =====================================================
 
-                <span
-                    class="small-label"
-                    data-en="Crop"
-                    data-ta="பயிர்"
-                >
-                    Crop
-                </span>
-
-                <strong>
-                    {{ result.crop }}
-                </strong>
-
-            </div>
+        let resultLanguage =
+            sessionStorage.getItem(
+                "yieldroi_language"
+            ) || "en";
 
 
-            <div>
+        function toggleResultLanguage() {
 
-                <span
-                    class="small-label"
-                    data-en="Season"
-                    data-ta="பருவம்"
-                >
-                    Season
-                </span>
-
-                <strong>
-                    {{ result.season }}
-                </strong>
-
-            </div>
+            resultLanguage =
+                resultLanguage === "en"
+                    ? "ta"
+                    : "en";
 
 
-            <div>
-
-                <span
-                    class="small-label"
-                    data-en="Year"
-                    data-ta="ஆண்டு"
-                >
-                    Year
-                </span>
-
-                <strong>
-                    {{ result.year }}
-                </strong>
-
-            </div>
-
-        </div>
+            sessionStorage.setItem(
+                "yieldroi_language",
+                resultLanguage
+            );
 
 
-        <div class="prediction-highlight">
+            applyResultLanguage();
 
-            <div>
-
-                <span
-                    class="small-label"
-                    data-en="Predicted yield"
-                    data-ta="கணிக்கப்பட்ட விளைச்சல்"
-                >
-                    Predicted yield
-                </span>
-
-                <div class="large-number">
-
-                    {{ "%.3f"|format(result.predicted_yield) }}
-
-                    <small>
-                        tonnes/ha
-                    </small>
-
-                </div>
-
-            </div>
+        }
 
 
-            <div class="production-box">
+        function applyResultLanguage() {
 
-                <span
-                    class="small-label"
-                    data-en="Expected production"
-                    data-ta="எதிர்பார்க்கப்படும் உற்பத்தி"
-                >
-                    Expected production
-                </span>
-
-                <strong>
-                    {{ "%.3f"|format(result.expected_production) }}
-                    tonnes
-                </strong>
-
-                <span>
-                    {{ "%.2f"|format(result.area) }} ha
-                </span>
-
-            </div>
-
-        </div>
-
-    </section>
+            document.documentElement.lang =
+                resultLanguage === "ta"
+                    ? "ta"
+                    : "en";
 
 
-    <!-- =====================================================
-         BENCHMARK
-    ====================================================== -->
+            document.body.classList.toggle(
+                "tamil-mode",
+                resultLanguage === "ta"
+            );
 
-    <section class="analysis-grid">
 
-        <article class="analysis-card benchmark-card">
+            const english =
+                document.querySelectorAll(
+                    ".language-en"
+                );
 
-            <div class="analysis-heading">
 
-                <div>
+            const tamil =
+                document.querySelectorAll(
+                    ".language-ta"
+                );
 
-                    <span class="analysis-icon">
-                        ✓
-                    </span>
 
-                    <div>
+            english.forEach(
+                function(element) {
 
-                        <span
-                            class="small-label"
-                            data-en="Official comparison"
-                            data-ta="அதிகாரப்பூர்வ ஒப்பீடு"
-                        >
-                            Official comparison
-                        </span>
+                    element.style.display =
+                        resultLanguage === "en"
+                            ? ""
+                            : "none";
 
-                        <h2
-                            data-en="Benchmark result"
-                            data-ta="அளவுகோல் முடிவு"
-                        >
-                            Benchmark result
+                }
+            );
+
+
+            tamil.forEach(
+                function(element) {
+
+                    element.style.display =
+                        resultLanguage === "ta"
+                            ? ""
+                            : "none";
+
+                }
+            );
+
+
+            const button =
+                document.getElementById(
+                    "languageSwitch"
+                );
+
+
+            if (button) {
+
+                button.textContent =
+                    resultLanguage === "en"
+                        ? "தமிழ்"
+                        : "English";
+
+            }
+
+        }
+
+
+        // =====================================================
+        // FORMATTERS
+        // =====================================================
+
+        function formatNumber(
+            value,
+            decimals = 2
+        ) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+
+                return "--";
+
+            }
+
+
+            const number =
+                Number(value);
+
+
+            if (Number.isNaN(number)) {
+
+                return "--";
+
+            }
+
+
+            return number.toLocaleString(
+                "en-IN",
+                {
+                    minimumFractionDigits:
+                        decimals,
+
+                    maximumFractionDigits:
+                        decimals
+                }
+            );
+
+        }
+
+
+        function formatCurrency(
+            value
+        ) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+
+                return "₹--";
+
+            }
+
+
+            const number =
+                Number(value);
+
+
+            if (Number.isNaN(number)) {
+
+                return "₹--";
+
+            }
+
+
+            return "₹" +
+                number.toLocaleString(
+                    "en-IN",
+                    {
+                        minimumFractionDigits:
+                            2,
+
+                        maximumFractionDigits:
+                            2
+                    }
+                );
+
+        }
+
+
+        // =====================================================
+        // GET RESULT DATA
+        // =====================================================
+
+        function getResultData() {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            const encoded =
+                params.get("data");
+
+
+            if (!encoded) {
+
+                return null;
+
+            }
+
+
+            try {
+
+                return JSON.parse(
+                    decodeURIComponent(
+                        encoded
+                    )
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Could not read result data:",
+                    error
+                );
+
+                return null;
+
+            }
+
+        }
+
+
+        // =====================================================
+        // LOAD RESULT
+        // =====================================================
+
+        function populateResult() {
+
+            const result =
+                getResultData();
+
+
+            if (!result) {
+
+                document.querySelector(
+                    ".result-container"
+                ).innerHTML = `
+
+                    <div class="result-error">
+
+                        <h2>
+                            Result unavailable
                         </h2>
+
+                        <p>
+                            The prediction result could not be loaded.
+                        </p>
+
+                        <button
+                            class="action-button primary-action"
+                            onclick="makeAnotherPrediction()">
+
+                            Go back
+
+                        </button>
 
                     </div>
 
-                </div>
-
-            </div>
+                `;
 
+                return;
 
-            {% if result.benchmark.available %}
+            }
 
-            <div class="metric-grid">
 
-                <div class="metric-box">
+            const input =
+                result.input || {};
 
-                    <span
-                        data-en="Prediction"
-                        data-ta="கணிப்பு"
-                    >
-                        Prediction
-                    </span>
 
-                    <strong>
-                        {{ "%.3f"|format(result.predicted_yield) }}
-                    </strong>
-
-                    <small>
-                        t/ha
-                    </small>
-
-                </div>
-
-
-                <div class="metric-box">
-
-                    <span
-                        data-en="Official benchmark"
-                        data-ta="அதிகாரப்பூர்வ அளவுகோல்"
-                    >
-                        Official benchmark
-                    </span>
+            const prediction =
+                result.prediction || {};
 
-                    <strong>
-                        {{ "%.3f"|format(result.benchmark.official_yield) }}
-                    </strong>
-
-                    <small>
-                        t/ha
-                    </small>
-
-                </div>
 
+            const benchmark =
+                result.benchmark || {};
 
-                <div class="metric-box">
 
-                    <span
-                        data-en="Difference"
-                        data-ta="வித்தியாசம்"
-                    >
-                        Difference
-                    </span>
+            const roi =
+                result.roi || {};
 
-                    <strong
-                        class="
-                        {% if result.benchmark.difference >= 0 %}
-                            positive
-                        {% else %}
-                            negative
-                        {% endif %}
-                        "
-                    >
-                        {{ "%+.3f"|format(result.benchmark.difference) }}
-                    </strong>
 
-                    <small>
-                        t/ha
-                    </small>
+            const fertilizer =
+                result.fertilizer || {};
 
-                </div>
 
+            // =================================================
+            // MAIN RESULT
+            // =================================================
 
-                <div class="metric-box">
+            document.getElementById(
+                "resultYield"
+            ).textContent =
+                formatNumber(
+                    prediction.yield_tonnes_per_hectare,
+                    3
+                );
 
-                    <span
-                        data-en="Difference %"
-                        data-ta="வித்தியாசம் %"
-                    >
-                        Difference %
-                    </span>
 
-                    <strong
-                        class="
-                        {% if result.benchmark.difference_pct is not none and result.benchmark.difference_pct >= 0 %}
-                            positive
-                        {% elif result.benchmark.difference_pct is not none %}
-                            negative
-                        {% endif %}
-                        "
-                    >
-                        {% if result.benchmark.difference_pct is not none %}
-                            {{ "%+.2f"|format(result.benchmark.difference_pct) }}%
-                        {% else %}
-                            —
-                        {% endif %}
-                    </strong>
+            document.getElementById(
+                "resultDistrict"
+            ).textContent =
+                input.district || "--";
 
-                </div>
 
-            </div>
+            document.getElementById(
+                "resultCrop"
+            ).textContent =
+                input.crop || "--";
 
 
-            <div class="benchmark-status">
+            document.getElementById(
+                "resultSeason"
+            ).textContent =
+                input.season || "--";
 
-                <span
-                    class="
-                    status-badge
-                    {% if 'Above' in result.benchmark.performance %}
-                        status-above
-                    {% elif 'Below' in result.benchmark.performance %}
-                        status-below
-                    {% else %}
-                        status-near
-                    {% endif %}
-                    "
-                >
-                    {{ result.benchmark.performance }}
-                </span>
 
-                <p>
-                    Official benchmark:
-                    {{ result.benchmark.benchmark_year }}
-                </p>
+            // =================================================
+            // BENCHMARK
+            // =================================================
 
-            </div>
+            if (
+                benchmark &&
+                benchmark.available
+            ) {
 
-            {% else %}
+                document.getElementById(
+                    "benchmarkStatus"
+                ).textContent =
+                    benchmark.status ||
+                    "Near benchmark";
 
-            <div class="empty-analysis">
 
-                <strong
-                    data-en="Benchmark unavailable"
-                    data-ta="அளவுகோல் கிடைக்கவில்லை"
-                >
-                    Benchmark unavailable
-                </strong>
+                document.getElementById(
+                    "benchmarkPredicted"
+                ).textContent =
+                    formatNumber(
+                        benchmark.predicted_yield,
+                        3
+                    ) +
+                    " tonnes/ha";
 
-                <p>
-                    {{ result.benchmark.message }}
-                </p>
 
-            </div>
+                document.getElementById(
+                    "benchmarkOfficial"
+                ).textContent =
+                    formatNumber(
+                        benchmark.benchmark_yield,
+                        3
+                    ) +
+                    " tonnes/ha";
 
-            {% endif %}
 
-        </article>
+                const difference =
+                    Number(
+                        benchmark.difference
+                    );
 
 
-        <!-- =================================================
-             ROI
-        ================================================== -->
+                document.getElementById(
+                    "benchmarkDifference"
+                ).textContent =
+                    (
+                        difference >= 0
+                            ? "+"
+                            : ""
+                    ) +
+                    formatNumber(
+                        difference,
+                        3
+                    );
+
+
+                const percentage =
+                    Number(
+                        benchmark.percentage_difference
+                    );
+
+
+                document.getElementById(
+                    "benchmarkPercentage"
+                ).textContent =
+                    (
+                        percentage >= 0
+                            ? "+"
+                            : ""
+                    ) +
+                    formatNumber(
+                        percentage,
+                        2
+                    ) +
+                    "%";
+
+
+                document.getElementById(
+                    "benchmarkMessage"
+                ).textContent =
+                    "Official benchmark: " +
+                    (
+                        benchmark.year ||
+                        "2024-25"
+                    );
+
+            } else {
+
+                document.getElementById(
+                    "benchmarkStatus"
+                ).textContent =
+                    "Unavailable";
+
 
-        <article class="analysis-card roi-card">
+                document.getElementById(
+                    "benchmarkMessage"
+                ).textContent =
+                    benchmark.message ||
+                    "Official benchmark comparison is not available for this crop.";
 
-            <div class="analysis-heading">
+            }
 
-                <div>
 
-                    <span class="analysis-icon">
-                        ₹
-                    </span>
+            // =================================================
+            // ROI
+            // =================================================
 
-                    <div>
+            if (
+                roi &&
+                roi.available
+            ) {
 
-                        <span
-                            class="small-label"
-                            data-en="Economic analysis"
-                            data-ta="பொருளாதார பகுப்பாய்வு"
-                        >
-                            Economic analysis
-                        </span>
+                document.getElementById(
+                    "roiValue"
+                ).textContent =
+                    formatNumber(
+                        roi.roi_percentage,
+                        2
+                    ) +
+                    "%";
 
-                        <h2
-                            data-en="Scenario ROI"
-                            data-ta="மதிப்பிடப்பட்ட ROI"
-                        >
-                            Scenario ROI
-                        </h2>
 
-                    </div>
+                document.getElementById(
+                    "roiStatus"
+                ).textContent =
+                    roi.status ||
+                    "--";
 
-                </div>
 
-            </div>
+                document.getElementById(
+                    "roiCost"
+                ).textContent =
+                    formatCurrency(
+                        roi.total_cost
+                    );
 
 
-            {% if result.roi.available %}
+                document.getElementById(
+                    "roiRevenue"
+                ).textContent =
+                    formatCurrency(
+                        roi.revenue
+                    );
 
-            <div class="roi-main">
-
-                <div>
-
-                    <span
-                        class="small-label"
-                        data-en="Estimated ROI"
-                        data-ta="மதிப்பிடப்பட்ட ROI"
-                    >
-                        Estimated ROI
-                    </span>
 
-                    <strong
-                        class="
-                        {% if result.roi.roi_percent >= 0 %}
-                            positive
-                        {% else %}
-                            negative
-                        {% endif %}
-                        "
-                    >
-                        {{ "%+.2f"|format(result.roi.roi_percent) }}%
-                    </strong>
+                document.getElementById(
+                    "roiProfit"
+                ).textContent =
+                    formatCurrency(
+                        roi.profit
+                    );
 
-                </div>
 
-                <span
-                    class="
-                    status-badge
-                    {% if result.roi.status == 'Profitable' %}
-                        status-above
-                    {% else %}
-                        status-below
-                    {% endif %}
-                    "
-                >
-                    {{ result.roi.status }}
-                </span>
+                document.getElementById(
+                    "roiPrice"
+                ).textContent =
+                    formatCurrency(
+                        roi.price_per_tonne
+                    );
 
-            </div>
+            } else {
 
+                document.getElementById(
+                    "roiValue"
+                ).textContent =
+                    "Unavailable";
 
-            <div class="roi-list">
 
-                <div>
-                    <span
-                        data-en="Cultivation cost"
-                        data-ta="சாகுபடி செலவு"
-                    >
-                        Cultivation cost
-                    </span>
+                document.getElementById(
+                    "roiStatus"
+                ).textContent =
+                    roi.message || "";
 
-                    <strong>
-                        ₹{{ "{:,.0f}".format(result.roi.total_cost) }}
-                    </strong>
-                </div>
+            }
 
 
-                <div>
-                    <span
-                        data-en="Reference price"
-                        data-ta="குறிப்பு விலை"
-                    >
-                        Reference price
-                    </span>
+            // =================================================
+            // FERTILIZER
+            // =================================================
 
-                    <strong>
-                        ₹{{ "{:,.0f}".format(result.roi.reference_price) }}/t
-                    </strong>
-                </div>
+            populateFertilizer(
+                fertilizer
+            );
 
 
-                <div>
-                    <span
-                        data-en="Estimated revenue"
-                        data-ta="மதிப்பிடப்பட்ட வருவாய்"
-                    >
-                        Estimated revenue
-                    </span>
+            // =================================================
+            // LANGUAGE
+            // =================================================
 
-                    <strong>
-                        ₹{{ "{:,.0f}".format(result.roi.estimated_revenue) }}
-                    </strong>
-                </div>
+            applyResultLanguage();
 
+        }
 
-                <div>
-                    <span
-                        data-en="Estimated profit"
-                        data-ta="மதிப்பிடப்பட்ட லாபம்"
-                    >
-                        Estimated profit
-                    </span>
 
-                    <strong
-                        class="
-                        {% if result.roi.estimated_profit >= 0 %}
-                            positive
-                        {% else %}
-                            negative
-                        {% endif %}
-                        "
-                    >
-                        ₹{{ "{:,.0f}".format(result.roi.estimated_profit) }}
-                    </strong>
-                </div>
+        // =====================================================
+        // FERTILIZER
+        // =====================================================
 
-            </div>
+        function populateFertilizer(
+            fertilizer
+        ) {
 
+            const message =
+                document.getElementById(
+                    "fertilizerMessage"
+                );
 
-            <p class="analysis-note">
-                {{ result.roi.note }}
-            </p>
 
-            {% else %}
+            const values =
+                document.getElementById(
+                    "fertilizerValues"
+                );
 
-            <div class="empty-analysis">
 
-                <strong
-                    data-en="ROI not available"
-                    data-ta="ROI கிடைக்கவில்லை"
-                >
-                    ROI not available
-                </strong>
+            if (
+                !fertilizer ||
+                fertilizer.available === false
+            ) {
 
-                <p>
-                    {{ result.roi.message }}
-                </p>
+                message.textContent =
+                    fertilizer.message ||
+                    (
+                        resultLanguage === "ta"
+                            ? "உர பரிந்துரை கிடைக்கவில்லை."
+                            : "Fertilizer recommendation is not available."
+                    );
 
-            </div>
 
-            {% endif %}
+                values.style.display =
+                    "none";
 
-        </article>
 
-    </section>
+                return;
 
+            }
 
-    <!-- =====================================================
-         FERTILIZER
-    ====================================================== -->
 
-    <section class="recommendation-card">
+            message.textContent =
+                fertilizer.message ||
+                fertilizer.explanation ||
+                fertilizer.source ||
+                (
+                    resultLanguage === "ta"
+                        ? "பரிந்துரை உருவாக்கப்பட்டது."
+                        : "Recommendation generated."
+                );
 
-        <div class="recommendation-heading">
 
-            <div class="recommendation-icon">
-                NPK
-            </div>
+            const nitrogen =
+                fertilizer.n ??
+                fertilizer.N ??
+                fertilizer.nitrogen;
 
-            <div>
 
-                <span class="small-label">
-                    YIELDROI
-                </span>
+            const phosphorus =
+                fertilizer.p2o5 ??
+                fertilizer.P2O5 ??
+                fertilizer.phosphorus;
 
-                <h2
-                    data-en="Fertilizer recommendation"
-                    data-ta="உர பரிந்துரை"
-                >
-                    Fertilizer recommendation
-                </h2>
 
-            </div>
+            const potassium =
+                fertilizer.k2o ??
+                fertilizer.K2O ??
+                fertilizer.potassium;
 
-        </div>
 
+            document.getElementById(
+                "fertilizerN"
+            ).textContent =
+                nitrogen !== undefined
+                    ? formatNumber(
+                        nitrogen,
+                        1
+                    )
+                    : "--";
 
-        {% if result.fertilizer.available %}
 
-        <div class="fertilizer-content">
+            document.getElementById(
+                "fertilizerP"
+            ).textContent =
+                phosphorus !== undefined
+                    ? formatNumber(
+                        phosphorus,
+                        1
+                    )
+                    : "--";
 
-            {% if result.fertilizer.n is defined %}
 
-            <div class="nutrient-card">
+            document.getElementById(
+                "fertilizerK"
+            ).textContent =
+                potassium !== undefined
+                    ? formatNumber(
+                        potassium,
+                        1
+                    )
+                    : "--";
 
-                <span>N</span>
 
-                <strong>
-                    {{ result.fertilizer.n }}
-                </strong>
+            // =================================================
+            // SOIL INFORMATION
+            // =================================================
 
-                <small>
-                    kg/ha
-                </small>
+            const soil =
+                fertilizer.soil_status ||
+                fertilizer.soil ||
+                fertilizer.soil_profile;
 
-            </div>
 
-            {% endif %}
+            if (
+                soil &&
+                typeof soil === "object"
+            ) {
 
+                const soilInfo =
+                    document.getElementById(
+                        "soilInfo"
+                    );
 
-            {% if result.fertilizer.p2o5 is defined %}
 
-            <div class="nutrient-card">
+                const soilGrid =
+                    document.getElementById(
+                        "soilGrid"
+                    );
 
-                <span>
-                    P₂O₅
-                </span>
 
-                <strong>
-                    {{ result.fertilizer.p2o5 }}
-                </strong>
+                soilGrid.innerHTML = "";
 
-                <small>
-                    kg/ha
-                </small>
 
-            </div>
+                Object.entries(
+                    soil
+                ).forEach(
+                    function(
+                        [key, value]
+                    ) {
 
-            {% endif %}
+                        const item =
+                            document.createElement(
+                                "div"
+                            );
 
 
-            {% if result.fertilizer.k2o is defined %}
+                        item.className =
+                            "soil-item";
 
-            <div class="nutrient-card">
 
-                <span>
-                    K₂O
-                </span>
+                        const keyElement =
+                            document.createElement(
+                                "span"
+                            );
 
-                <strong>
-                    {{ result.fertilizer.k2o }}
-                </strong>
 
-                <small>
-                    kg/ha
-                </small>
+                        keyElement.textContent =
+                            key;
 
-            </div>
 
-            {% endif %}
+                        const valueElement =
+                            document.createElement(
+                                "strong"
+                            );
 
 
-            {% if result.fertilizer.recommendation is defined %}
+                        valueElement.textContent =
+                            value;
 
-            <p class="recommendation-text">
-                {{ result.fertilizer.recommendation }}
-            </p>
 
-            {% endif %}
+                        item.appendChild(
+                            keyElement
+                        );
 
-        </div>
 
-        {% else %}
+                        item.appendChild(
+                            valueElement
+                        );
 
-        <div class="recommendation-placeholder">
 
-            <strong
-                data-en="Soil-based recommendation"
-                data-ta="மண் அடிப்படையிலான பரிந்துரை"
-            >
-                Soil-based recommendation
-            </strong>
+                        soilGrid.appendChild(
+                            item
+                        );
 
-            <p>
-                {{ result.fertilizer.message }}
-            </p>
+                    }
+                );
 
-        </div>
 
-        {% endif %}
+                if (
+                    soilGrid.children.length > 0
+                ) {
 
-    </section>
+                    soilInfo.style.display =
+                        "block";
 
+                }
 
-    <!-- =====================================================
-         INTERPRETATION
-    ====================================================== -->
+            }
 
-    <section class="interpretation-card">
+        }
 
-        <div>
 
-            <span class="section-label">
-                INTERPRETATION
-            </span>
+        // =====================================================
+        // OPEN REPORT
+        // =====================================================
 
-            <h2
-                data-en="What this result means"
-                data-ta="இந்த முடிவு என்ன சொல்கிறது"
-            >
-                What this result means
-            </h2>
+        function openReport() {
 
-        </div>
+            const result =
+                getResultData();
 
 
-        <div class="interpretation-text">
+            if (!result) {
 
-            {% if result.benchmark.available %}
+                return;
 
-                {% if result.benchmark.performance == "Above benchmark" %}
+            }
 
-                <p
-                    data-en="The predicted yield is above the selected official benchmark for this district and crop."
-                    data-ta="இந்த மாவட்டம் மற்றும் பயிரிற்கான அதிகாரப்பூர்வ அளவுகோலை விட கணிக்கப்பட்ட விளைச்சல் அதிகமாக உள்ளது."
-                >
-                    The predicted yield is above the selected official
-                    benchmark for this district and crop.
-                </p>
 
-                {% elif result.benchmark.performance == "Below benchmark" %}
+            const encoded =
+                encodeURIComponent(
+                    JSON.stringify(result)
+                );
 
-                <p
-                    data-en="The predicted yield is below the selected official benchmark. This result should be treated as a planning signal rather than a guaranteed outcome."
-                    data-ta="கணிக்கப்பட்ட விளைச்சல் அதிகாரப்பூர்வ அளவுகோலை விட குறைவாக உள்ளது. இது திட்டமிடலுக்கான ஒரு அறிகுறியாக மட்டுமே கருதப்பட வேண்டும்."
-                >
-                    The predicted yield is below the selected official
-                    benchmark. This result should be treated as a planning
-                    signal rather than a guaranteed outcome.
-                </p>
 
-                {% else %}
+            window.location.href =
+                "/report?data=" +
+                encoded;
 
-                <p
-                    data-en="The predicted yield is close to the selected official benchmark, indicating a result broadly aligned with the reference value."
-                    data-ta="கணிக்கப்பட்ட விளைச்சல் அதிகாரப்பூர்வ அளவுகோலுக்கு அருகில் உள்ளது."
-                >
-                    The predicted yield is close to the selected official
-                    benchmark, indicating a result broadly aligned with
-                    the reference value.
-                </p>
+        }
 
-                {% endif %}
 
-            {% else %}
+        // =====================================================
+        // ANOTHER PREDICTION
+        // =====================================================
 
-            <p>
-                {{ result.benchmark.message }}
-            </p>
+        function makeAnotherPrediction() {
 
-            {% endif %}
+            window.location.href =
+                "/";
 
+        }
 
-            <p
-                data-en="The economic section is a scenario calculation based on reference cost and price values. It should not be interpreted as a guaranteed farm-level profit."
-                data-ta="பொருளாதார பகுதி குறிப்பு செலவு மற்றும் விலை மதிப்புகளை அடிப்படையாகக் கொண்ட மதிப்பீடு மட்டுமே. இது உறுதியான பண்ணை லாபமாக கருதப்படக்கூடாது."
-            >
-                The economic section is a scenario calculation based on
-                reference cost and price values. It should not be interpreted
-                as a guaranteed farm-level profit.
-            </p>
 
-        </div>
+        // =====================================================
+        // INITIALIZE
+        // =====================================================
 
-    </section>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
 
+                populateResult();
 
-    <!-- =====================================================
-         BOTTOM ACTIONS
-    ====================================================== -->
+            }
+        );
 
-    <section class="bottom-actions">
-
-        <a
-            href="/"
-            class="outline-button"
-            data-en="Start another prediction"
-            data-ta="மற்றொரு கணிப்பை தொடங்குங்கள்"
-        >
-            Start another prediction
-        </a>
-
-        <button
-            type="button"
-            class="primary-button"
-            id="printReportButton"
-        >
-            <span
-                data-en="Print full report"
-                data-ta="முழு அறிக்கையை அச்சிடுக"
-            >
-                Print full report
-            </span>
-        </button>
-
-    </section>
-
-</main>
-
-
-<!-- =========================================================
-     REPORT DATA
-========================================================== -->
-
-<script>
-    window.YIELDROI_RESULT = {{ result | tojson }};
-</script>
-
-<script
-    src="{{ url_for('static', filename='script.js') }}"
-></script>
+    </script>
 
 </body>
 </html>
