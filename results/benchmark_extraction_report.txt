@@ -1,0 +1,84 @@
+YieldROI - Official Yield Benchmark Extraction Report
+======================================================================
+
+Source: averageyieldrateofcrops.pdf
+Reference year: 2024-25
+
+Expected records: 3458
+Actual records: 3458
+Districts: 38
+Crops: 52
+Seasons: 6
+
+PAGE RESULTS
+--------------------------------------------------
+Page 1: 266 records | 38 districts | district-line extraction | PASS
+Page 2: 228 records | 38 districts | district-line extraction | PASS
+Page 3: 266 records | 38 districts | district-line extraction | PASS
+Page 4: 304 records | 38 districts | district-line extraction | PASS
+Page 5: 342 records | 38 districts | district-line extraction | PASS
+Page 6: 266 records | 38 districts | district-line extraction | PASS
+Page 7: 266 records | 38 districts | district-line extraction | PASS
+Page 8: 304 records | 38 districts | district-line extraction | PASS
+Page 9: 266 records | 38 districts | district-line extraction | PASS
+Page 10: 266 records | 38 districts | district-line extraction | PASS
+Page 11: 304 records | 38 districts | district-line extraction | PASS
+Page 12: 190 records | 38 districts | district-line extraction | PASS
+Page 13: 190 records | 38 districts | district-line extraction | PASS
+
+DISTRICT COVERAGE: PASS
+
+CROP COUNTS
+--------------------------------------------------
+Arecanut: 38
+Bajra (Cumbu): 114
+Banana: 38
+Bengal Gram: 38
+Black Gram: 114
+Brinjal: 38
+Cabbage: 38
+Cardamom: 38
+Cashew Nut: 38
+Castor: 38
+Chillies: 38
+Cloves: 38
+Coconut: 38
+Coriander: 38
+Cotton: 114
+Cowpea: 114
+Garlic: 38
+Gingelly: 114
+Ginger: 38
+Grapes: 38
+Green Gram: 114
+Groundnut: 114
+Guava: 38
+Horse Gram: 114
+Jack Fruit: 38
+Jowar (Cholam): 114
+Korra: 38
+Lady's Finger: 38
+Lemon: 38
+Maize: 114
+Mango: 38
+Onion: 114
+Orange: 38
+Other Cereals: 38
+Other Pulses: 114
+Paddy: 152
+Pepper: 38
+Pine Apple: 38
+Potato: 114
+Ragi: 114
+Rapeseed & Mustard: 38
+Red Gram: 114
+Samai: 114
+Sugar Cane: 38
+Sun Flower: 114
+Sweet Potato: 38
+Tamarind: 38
+Tapioca: 38
+Tobacco: 38
+Tomato: 38
+Turmeric: 38
+Varagu: 114

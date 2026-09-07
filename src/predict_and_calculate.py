@@ -1,225 +1,146 @@
 """
-YieldROI - Integrated Yield Prediction + ROI
+YieldROI - Integrated Prediction + Benchmark + ROI Pipeline
 
 Pipeline:
 
-User Input
-    ↓
-Existing trained Yield Model
-    ↓
-Predicted Yield (tonnes/ha)
-    ↓
-Production
-    ↓
-Revenue
-    ↓
-Cost
-    ↓
-Profit
-    ↓
-ROI %
+    Input
+      ↓
+    ML Yield Prediction
+      ↓
+    Official 2024-25 Benchmark Comparison
+      ↓
+    ROI Calculation
+      ↓
+    Final Result
 
-IMPORTANT:
-    The trained model is loaded directly from:
-        models/best_yield_model.joblib
-
-    The model output is used directly as tonnes/hectare.
-    No additional /1000 conversion is applied.
+Important:
+    - Model predicts tonnes/ha.
+    - Official benchmark is independent validation data.
+    - ROI is a benchmark/scenario estimate, not actual farmer profit.
 """
 
 from pathlib import Path
 import json
-import math
-
 import joblib
 import pandas as pd
 
 
 # ============================================================
-# 1. PROJECT PATHS
+# PATHS
 # ============================================================
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[1]
 
-MODEL_DIR = BASE_DIR / "models"
-RESULTS_DIR = BASE_DIR / "results"
-
-MODEL_FILE = MODEL_DIR / "best_yield_model.joblib"
-
-OUTPUT_FILE = (
-    RESULTS_DIR
-    / "integrated_prediction_roi.json"
+MODEL_FILE = (
+    ROOT / "models" / "best_yield_model.joblib"
 )
 
-RESULTS_DIR.mkdir(
-    parents=True,
-    exist_ok=True
+RESULT_FILE = (
+    ROOT / "results" / "integrated_prediction_roi.json"
 )
 
 
 # ============================================================
-# 2. ROI BENCHMARK DATA
+# IMPORT BENCHMARK COMPARATOR
 # ============================================================
 
-# Cost:
-#     INR / hectare
-#
-# Price:
-#     INR / tonne
+from benchmark_comparator import compare_prediction
 
-COST_BENCHMARKS = {
 
-    "rice": 93687.0,
+# ============================================================
+# MODEL FEATURES
+# ============================================================
 
-    "sorghum": 53621.0,
+FEATURES = [
+    "district",
+    "crop",
+    "season",
+    "year",
+    "area",
+]
 
-    "maize": 95530.0,
 
-    "black gram": 52775.0,
+# ============================================================
+# ROI DATA
+# ============================================================
 
-    "blackgram": 52775.0,
+# Cost of cultivation:
+# ₹ / hectare
 
-    "groundnut": 98650.0,
+COST_PER_HECTARE = {
 
-    "gingelly": 55099.0,
+    "rice": 93687,
 
-    "sesamum": 55099.0,
+    "sorghum": 53621,
 
-    "cotton": 127589.0,
+    "maize": 95530,
 
-    "cotton lint": 127589.0,
+    "black gram": 52775,
+    "blackgram": 52775,
 
-    "sugarcane": 277275.0
+    "groundnut": 98650,
+
+    "gingelly": 55099,
+    "sesamum": 55099,
+
+    "cotton": 127589,
+    "cotton lint": 127589,
+
+    "sugarcane": 277275,
 }
 
 
-PRICE_BENCHMARKS = {
+# Reference prices:
+# ₹ / tonne
 
-    "rice": {
-        "price": 24410.0,
-        "type": "MSP - Paddy Common"
-    },
+REFERENCE_PRICE = {
 
-    "sorghum": {
-        "price": 40230.0,
-        "type": "MSP - Sorghum Hybrid"
-    },
+    "rice": 24410,
 
-    "maize": {
-        "price": 24100.0,
-        "type": "MSP - Maize"
-    },
+    "sorghum": 40230,
 
-    "black gram": {
-        "price": 82000.0,
-        "type": "MSP - Blackgram"
-    },
+    "maize": 24100,
 
-    "blackgram": {
-        "price": 82000.0,
-        "type": "MSP - Blackgram"
-    },
+    "black gram": 82000,
+    "blackgram": 82000,
 
-    "groundnut": {
-        "price": 75170.0,
-        "type": "MSP - Groundnut"
-    },
+    "groundnut": 75170,
 
-    "gingelly": {
-        "price": 103460.0,
-        "type": "MSP - Sesamum"
-    },
+    "gingelly": 103460,
+    "sesamum": 103460,
 
-    "sesamum": {
-        "price": 103460.0,
-        "type": "MSP - Sesamum"
-    },
+    "cotton": 82670,
+    "cotton lint": 82670,
 
-    "cotton": {
-        "price": 82670.0,
-        "type": "MSP - Cotton Medium Staple"
-    },
+    "sugarcane": 3650,
+}
 
-    "cotton lint": {
-        "price": 82670.0,
-        "type": "MSP - Cotton Medium Staple"
-    },
 
-    "sugarcane": {
-        "price": 3650.0,
-        "type": "Published reference price"
-    }
+PRICE_TYPE = {
+
+    "rice": "MSP - Paddy Common",
+
+    "sorghum": "MSP - Sorghum Hybrid",
+
+    "maize": "MSP - Maize",
+
+    "black gram": "MSP - Blackgram",
+    "blackgram": "MSP - Blackgram",
+
+    "groundnut": "MSP - Groundnut",
+
+    "gingelly": "MSP - Sesamum",
+    "sesamum": "MSP - Sesamum",
+
+    "cotton": "MSP - Cotton Medium Staple",
+    "cotton lint": "MSP - Cotton Medium Staple",
+
+    "sugarcane": "Published reference price",
 }
 
 
 # ============================================================
-# 3. UTILITY FUNCTIONS
-# ============================================================
-
-def normalize_crop(crop):
-
-    return (
-        str(crop)
-        .strip()
-        .lower()
-        .replace("_", " ")
-        .replace("-", " ")
-    )
-
-
-def validate_text(
-    value,
-    field_name
-):
-
-    value = str(value).strip()
-
-    if not value:
-
-        raise ValueError(
-            f"{field_name} cannot be empty."
-        )
-
-    return value
-
-
-def validate_number(
-    value,
-    field_name,
-    minimum=None
-):
-
-    try:
-
-        number = float(value)
-
-    except (TypeError, ValueError):
-
-        raise ValueError(
-            f"{field_name} must be a valid number."
-        )
-
-    if not math.isfinite(number):
-
-        raise ValueError(
-            f"{field_name} must be a finite number."
-        )
-
-    if (
-        minimum is not None
-        and number < minimum
-    ):
-
-        raise ValueError(
-            f"{field_name} must be at least "
-            f"{minimum}."
-        )
-
-    return number
-
-
-# ============================================================
-# 4. LOAD MODEL
+# MODEL
 # ============================================================
 
 def load_model():
@@ -227,33 +148,79 @@ def load_model():
     if not MODEL_FILE.exists():
 
         raise FileNotFoundError(
-            "\nTrained model not found:\n"
-            f"{MODEL_FILE}\n\n"
-            "Please run:\n"
-            "python src/train_models.py"
+            f"Model not found:\n{MODEL_FILE}"
         )
 
-    print(
-        "\nLoading trained YieldROI model..."
-    )
-
-    model = joblib.load(
+    return joblib.load(
         MODEL_FILE
     )
 
-    print(
-        "Model loaded successfully:"
-    )
 
-    print(
-        f"  {MODEL_FILE}"
-    )
+# ============================================================
+# VALIDATION
+# ============================================================
 
-    return model
+def validate_input(
+    district,
+    crop,
+    season,
+    year,
+    area
+):
+
+    if not str(district).strip():
+
+        raise ValueError(
+            "District cannot be empty."
+        )
+
+    if not str(crop).strip():
+
+        raise ValueError(
+            "Crop cannot be empty."
+        )
+
+    if not str(season).strip():
+
+        raise ValueError(
+            "Season cannot be empty."
+        )
+
+    try:
+
+        year = int(year)
+
+    except:
+
+        raise ValueError(
+            "Year must be an integer."
+        )
+
+    if year < 1997:
+
+        raise ValueError(
+            "Year must be 1997 or later."
+        )
+
+    try:
+
+        area = float(area)
+
+    except:
+
+        raise ValueError(
+            "Area must be numeric."
+        )
+
+    if area <= 0:
+
+        raise ValueError(
+            "Area must be greater than zero."
+        )
 
 
 # ============================================================
-# 5. PREDICT YIELD
+# PREDICT YIELD
 # ============================================================
 
 def predict_yield(
@@ -265,249 +232,157 @@ def predict_yield(
     area
 ):
 
-    # The training script uses exactly these
-    # five features.
-    #
-    # district
-    # crop
-    # season
-    # year
-    # area
-
     input_data = pd.DataFrame(
-        [
-            {
-                "district": district,
-                "crop": crop,
-                "season": season,
-                "year": year,
-                "area": area
-            }
-        ]
+        [{
+            "district": district,
+            "crop": crop,
+            "season": season,
+            "year": int(year),
+            "area": float(area),
+        }]
     )
 
     prediction = model.predict(
-        input_data
+        input_data[FEATURES]
+    )[0]
+
+    # Model target is tonnes/ha.
+    prediction = float(
+        prediction
     )
 
-    predicted_yield = float(
-        prediction[0]
-    )
+    # Safety check.
+    if prediction < 0:
 
-    if not math.isfinite(
-        predicted_yield
-    ):
+        prediction = 0.0
 
-        raise ValueError(
-            "The ML model returned an invalid "
-            "yield prediction."
-        )
-
-    # A yield prediction cannot be negative.
-
-    predicted_yield = max(
-        0.0,
-        predicted_yield
-    )
-
-    return predicted_yield
+    return prediction
 
 
 # ============================================================
-# 6. CALCULATE ROI
+# ROI
 # ============================================================
 
 def calculate_roi(
     crop,
-    predicted_yield_tonnes_per_ha,
-    area_hectares
+    predicted_yield,
+    area
 ):
 
-    crop_key = normalize_crop(
-        crop
+    crop_key = (
+        str(crop)
+        .strip()
+        .lower()
     )
 
-    # --------------------------------------------------------
-    # Check crop
-    # --------------------------------------------------------
+    if crop_key not in COST_PER_HECTARE:
 
-    if crop_key not in COST_BENCHMARKS:
+        return {
+            "status": "ROI unavailable",
+            "reason": (
+                "Cost/reference-price data is not "
+                "available for this crop."
+            ),
+        }
 
-        available = ", ".join(
-            sorted(
-                COST_BENCHMARKS.keys()
-            )
-        )
-
-        raise ValueError(
-            f"\nNo cultivation-cost benchmark "
-            f"is configured for '{crop}'.\n\n"
-            f"Currently supported crops:\n"
-            f"{available}"
-        )
-
-    if crop_key not in PRICE_BENCHMARKS:
-
-        raise ValueError(
-            f"No reference price configured "
-            f"for '{crop}'."
-        )
-
-    # --------------------------------------------------------
-    # Production
-    # --------------------------------------------------------
-
-    predicted_production_tonnes = (
-        predicted_yield_tonnes_per_ha
-        * area_hectares
+    cost_per_ha = float(
+        COST_PER_HECTARE[crop_key]
     )
 
-    # --------------------------------------------------------
-    # Cost
-    # --------------------------------------------------------
+    price_per_tonne = float(
+        REFERENCE_PRICE[crop_key]
+    )
 
-    cost_per_hectare = (
-        COST_BENCHMARKS[crop_key]
+    area = float(area)
+
+    predicted_yield = float(
+        predicted_yield
     )
 
     total_cost = (
-        cost_per_hectare
-        * area_hectares
+        cost_per_ha
+        *
+        area
     )
 
-    # --------------------------------------------------------
-    # Price
-    # --------------------------------------------------------
-
-    price_data = PRICE_BENCHMARKS[
-        crop_key
-    ]
-
-    price_per_tonne = (
-        price_data["price"]
+    total_production = (
+        predicted_yield
+        *
+        area
     )
-
-    price_type = (
-        price_data["type"]
-    )
-
-    # --------------------------------------------------------
-    # Revenue
-    # --------------------------------------------------------
 
     revenue = (
-        predicted_production_tonnes
-        * price_per_tonne
+        total_production
+        *
+        price_per_tonne
     )
-
-    # --------------------------------------------------------
-    # Profit
-    # --------------------------------------------------------
 
     profit = (
         revenue
-        - total_cost
+        -
+        total_cost
     )
-
-    # --------------------------------------------------------
-    # ROI
-    # --------------------------------------------------------
 
     if total_cost > 0:
 
-        roi_percentage = (
+        roi_percent = (
             profit
-            / total_cost
+            /
+            total_cost
         ) * 100
 
     else:
 
-        roi_percentage = None
-
-    # --------------------------------------------------------
-    # Profitability
-    # --------------------------------------------------------
+        roi_percent = 0.0
 
     if profit > 0:
 
-        profitability_status = (
-            "Profitable"
-        )
+        status = "Profitable"
 
     elif profit < 0:
 
-        profitability_status = (
-            "Loss"
-        )
+        status = "Loss"
 
     else:
 
-        profitability_status = (
-            "Break-even"
-        )
+        status = "Break-even"
 
     return {
 
-        "predicted_yield_tonnes_per_ha":
-            round(
-                predicted_yield_tonnes_per_ha,
-                4
-            ),
+        "status": status,
 
-        "predicted_production_tonnes":
-            round(
-                predicted_production_tonnes,
-                4
-            ),
+        "cost_per_hectare": cost_per_ha,
 
-        "cost_per_hectare":
-            round(
-                cost_per_hectare,
-                2
-            ),
+        "total_cost": total_cost,
 
-        "total_cost":
-            round(
-                total_cost,
-                2
-            ),
+        "reference_price_per_tonne": (
+            price_per_tonne
+        ),
 
-        "price_per_tonne":
-            round(
-                price_per_tonne,
-                2
-            ),
+        "price_type": PRICE_TYPE[
+            crop_key
+        ],
 
-        "price_type":
-            price_type,
+        "total_production_tonnes": (
+            total_production
+        ),
 
-        "revenue":
-            round(
-                revenue,
-                2
-            ),
+        "revenue": revenue,
 
-        "profit":
-            round(
-                profit,
-                2
-            ),
+        "profit": profit,
 
-        "roi_percentage":
-            round(
-                roi_percentage,
-                2
-            )
-            if roi_percentage is not None
-            else None,
+        "roi_percent": roi_percent,
 
-        "profitability_status":
-            profitability_status
+        "roi_note": (
+            "Benchmark/scenario estimate. "
+            "Actual farmer costs, prices and returns "
+            "may differ."
+        ),
     }
 
 
 # ============================================================
-# 7. COMPLETE PIPELINE
+# COMPLETE PIPELINE
 # ============================================================
 
 def run_pipeline(
@@ -519,33 +394,15 @@ def run_pipeline(
 ):
 
     # --------------------------------------------------------
-    # Validate input
+    # Validate
     # --------------------------------------------------------
 
-    district = validate_text(
+    validate_input(
         district,
-        "District"
-    )
-
-    crop = validate_text(
         crop,
-        "Crop"
-    )
-
-    season = validate_text(
         season,
-        "Season"
-    )
-
-    year = validate_number(
         year,
-        "Year"
-    )
-
-    area = validate_number(
-        area,
-        "Area",
-        minimum=0.01
+        area
     )
 
     # --------------------------------------------------------
@@ -555,12 +412,8 @@ def run_pipeline(
     model = load_model()
 
     # --------------------------------------------------------
-    # Predict yield
+    # ML prediction
     # --------------------------------------------------------
-
-    print(
-        "\nGenerating yield prediction..."
-    )
 
     predicted_yield = predict_yield(
         model=model,
@@ -572,24 +425,34 @@ def run_pipeline(
     )
 
     # --------------------------------------------------------
-    # IMPORTANT
-    #
-    # The prediction is used directly as
-    # tonnes/hectare.
-    #
-    # No /1000 conversion.
+    # Production
     # --------------------------------------------------------
 
-    print(
-        "Calculating ROI..."
+    total_production = (
+        predicted_yield
+        *
+        float(area)
     )
+
+    # --------------------------------------------------------
+    # Official benchmark
+    # --------------------------------------------------------
+
+    benchmark = compare_prediction(
+        district=district,
+        crop=crop,
+        season=season,
+        predicted_yield=predicted_yield
+    )
+
+    # --------------------------------------------------------
+    # ROI
+    # --------------------------------------------------------
 
     roi = calculate_roi(
         crop=crop,
-        predicted_yield_tonnes_per_ha=(
-            predicted_yield
-        ),
-        area_hectares=area
+        predicted_yield=predicted_yield,
+        area=area
     )
 
     # --------------------------------------------------------
@@ -598,350 +461,358 @@ def run_pipeline(
 
     result = {
 
-        "project":
-            "YieldROI",
-
         "input": {
 
-            "district":
-                district,
+            "district": district,
 
-            "crop":
-                crop,
+            "crop": crop,
 
-            "season":
-                season,
+            "season": season,
 
-            "year":
-                int(year)
-                if year.is_integer()
-                else year,
+            "year": int(year),
 
-            "area_hectares":
-                round(
-                    area,
-                    4
-                )
+            "area_hectares": float(area),
         },
 
-        "yield_prediction": {
+        "prediction": {
 
-            "predicted_yield_tonnes_per_ha":
-                roi[
-                    "predicted_yield_tonnes_per_ha"
-                ],
-
-            "predicted_production_tonnes":
-                roi[
-                    "predicted_production_tonnes"
-                ]
-        },
-
-        "economic_analysis":
-            roi,
-
-        "calculation_basis":
-            (
-                "Benchmark/scenario ROI using "
-                "the YieldROI ML yield prediction, "
-                "official cultivation-cost benchmark "
-                "and reference crop price."
+            "predicted_yield_tonnes_per_ha": (
+                predicted_yield
             ),
 
-        "model_file":
-            str(
-                MODEL_FILE
-            )
+            "total_production_tonnes": (
+                total_production
+            ),
+        },
+
+        "official_benchmark": benchmark,
+
+        "roi": roi,
+
+        "notes": [
+
+            "Model prediction is expressed "
+            "in tonnes per hectare.",
+
+            "Official benchmark is an independent "
+            "2024-25 Tamil Nadu reference.",
+
+            "ROI is a benchmark/scenario estimate "
+            "and should not be interpreted as "
+            "actual farmer profit.",
+
+        ],
     }
 
     return result
 
 
 # ============================================================
-# 8. DISPLAY RESULT
+# DISPLAY
 # ============================================================
 
 def display_result(result):
 
-    print("\n")
+    data = result["input"]
 
-    print(
-        "=" * 70
-    )
+    prediction = result["prediction"]
 
-    print(
-        "              YIELDROI - PREDICTION + ROI"
-    )
-
-    print(
-        "=" * 70
-    )
-
-    input_data = result[
-        "input"
+    benchmark = result[
+        "official_benchmark"
     ]
 
-    prediction = result[
-        "yield_prediction"
-    ]
+    roi = result["roi"]
 
-    economics = result[
-        "economic_analysis"
-    ]
+    print()
+    print("=" * 75)
+    print("                         YieldROI")
+    print("       Intelligent Crop Yield + Benchmark + ROI")
+    print("=" * 75)
+
+    print()
+
+    print("INPUT")
+    print("-" * 75)
+
+    print(
+        f"District        : "
+        f"{data['district']}"
+    )
+
+    print(
+        f"Crop            : "
+        f"{data['crop']}"
+    )
+
+    print(
+        f"Season          : "
+        f"{data['season']}"
+    )
+
+    print(
+        f"Year            : "
+        f"{data['year']}"
+    )
+
+    print(
+        f"Area            : "
+        f"{data['area_hectares']:.2f} ha"
+    )
 
     # --------------------------------------------------------
-    # Input
+    # Prediction
     # --------------------------------------------------------
 
-    print("\nINPUT")
+    print()
+    print("ML PREDICTION")
+    print("-" * 75)
 
     print(
-        f"District            : "
-        f"{input_data['district']}"
-    )
-
-    print(
-        f"Crop                : "
-        f"{input_data['crop']}"
-    )
-
-    print(
-        f"Season              : "
-        f"{input_data['season']}"
-    )
-
-    print(
-        f"Year                : "
-        f"{input_data['year']}"
-    )
-
-    print(
-        f"Area                : "
-        f"{input_data['area_hectares']:.2f} ha"
-    )
-
-    # --------------------------------------------------------
-    # Yield
-    # --------------------------------------------------------
-
-    print(
-        "\n" + "-" * 70
-    )
-
-    print(
-        "ML YIELD PREDICTION"
-    )
-
-    print(
-        "-" * 70
-    )
-
-    print(
-        f"\nPredicted Yield     : "
-        f"{prediction['predicted_yield_tonnes_per_ha']:,.2f} "
+        f"Predicted Yield : "
+        f"{prediction['predicted_yield_tonnes_per_ha']:.3f} "
         f"tonnes/ha"
     )
 
     print(
-        f"Total Production    : "
-        f"{prediction['predicted_production_tonnes']:,.2f} "
+        f"Total Production: "
+        f"{prediction['total_production_tonnes']:.3f} "
         f"tonnes"
     )
+
+    # --------------------------------------------------------
+    # Benchmark
+    # --------------------------------------------------------
+
+    print()
+    print("OFFICIAL 2024-25 BENCHMARK")
+    print("-" * 75)
+
+    status = benchmark.get(
+        "status"
+    )
+
+    print(
+        f"Status          : "
+        f"{status}"
+    )
+
+    if (
+        benchmark.get(
+            "official_yield_tonnes_per_ha"
+        )
+        is not None
+    ):
+
+        print(
+            f"Official Yield  : "
+            f"{benchmark['official_yield_tonnes_per_ha']:.3f} "
+            f"tonnes/ha"
+        )
+
+        print(
+            f"Difference      : "
+            f"{benchmark['difference_tonnes_per_ha']:.3f} "
+            f"tonnes/ha"
+        )
+
+        if benchmark.get(
+            "difference_percent"
+        ) is not None:
+
+            print(
+                f"Difference %    : "
+                f"{benchmark['difference_percent']:.2f}%"
+            )
+
+        print(
+            f"Performance     : "
+            f"{benchmark['performance']}"
+        )
+
+        print(
+            f"Source page     : "
+            f"{benchmark['source_page']}"
+        )
+
+    else:
+
+        print(
+            "Official Yield  : "
+            "Not directly comparable"
+        )
+
+        if benchmark.get(
+            "official_unit"
+        ):
+
+            print(
+                f"Official Unit   : "
+                f"{benchmark['official_unit']}"
+            )
 
     # --------------------------------------------------------
     # ROI
     # --------------------------------------------------------
 
-    print(
-        "\n" + "-" * 70
-    )
+    print()
+    print("ROI / ECONOMIC SCENARIO")
+    print("-" * 75)
+
+    if roi.get("status") == "ROI unavailable":
+
+        print(
+            "ROI             : "
+            "Unavailable"
+        )
+
+        print(
+            f"Reason          : "
+            f"{roi['reason']}"
+        )
+
+    else:
+
+        print(
+            f"Cost / ha       : ₹"
+            f"{roi['cost_per_hectare']:,.2f}"
+        )
+
+        print(
+            f"Total Cost      : ₹"
+            f"{roi['total_cost']:,.2f}"
+        )
+
+        print(
+            f"Reference Price : ₹"
+            f"{roi['reference_price_per_tonne']:,.2f}"
+            f" / tonne"
+        )
+
+        print(
+            f"Price Type      : "
+            f"{roi['price_type']}"
+        )
+
+        print(
+            f"Revenue         : ₹"
+            f"{roi['revenue']:,.2f}"
+        )
+
+        print(
+            f"Profit          : ₹"
+            f"{roi['profit']:,.2f}"
+        )
+
+        print(
+            f"ROI             : "
+            f"{roi['roi_percent']:.2f}%"
+        )
+
+        print(
+            f"Status          : "
+            f"{roi['status']}"
+        )
+
+    print()
 
     print(
-        "ROI / ECONOMIC ANALYSIS"
+        "NOTE: Benchmark and ROI values are "
+        "reference/scenario estimates."
     )
 
-    print(
-        "-" * 70
-    )
+    print()
 
-    print(
-        f"\nCost / hectare      : "
-        f"₹{economics['cost_per_hectare']:,.2f}"
-    )
-
-    print(
-        f"Total Cost          : "
-        f"₹{economics['total_cost']:,.2f}"
-    )
-
-    print(
-        f"Reference Price     : "
-        f"₹{economics['price_per_tonne']:,.2f}/tonne"
-    )
-
-    print(
-        f"Price Type          : "
-        f"{economics['price_type']}"
-    )
-
-    print(
-        f"\nEstimated Revenue   : "
-        f"₹{economics['revenue']:,.2f}"
-    )
-
-    print(
-        f"Estimated Profit    : "
-        f"₹{economics['profit']:,.2f}"
-    )
-
-    print(
-        f"ROI                 : "
-        f"{economics['roi_percentage']:.2f}%"
-    )
-
-    print(
-        f"Status              : "
-        f"{economics['profitability_status']}"
-    )
-
-    # --------------------------------------------------------
-    # Note
-    # --------------------------------------------------------
-
-    print(
-        "\n" + "-" * 70
-    )
-
-    print(
-        "NOTE: ROI is a benchmark/scenario estimate."
-    )
-
-    print(
-        "Actual farm economics may vary with "
-        "farm-specific costs and selling prices."
-    )
-
-    print(
-        "=" * 70
-    )
+    print("=" * 75)
 
 
 # ============================================================
-# 9. SAVE RESULT
+# SAVE
 # ============================================================
 
 def save_result(result):
 
+    RESULT_FILE.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
     with open(
-        OUTPUT_FILE,
+        RESULT_FILE,
         "w",
         encoding="utf-8"
-    ) as file:
+    ) as f:
 
         json.dump(
             result,
-            file,
+            f,
             indent=4
         )
 
-    return OUTPUT_FILE
+    print()
+    print(
+        f"Result saved to:"
+    )
+
+    print(
+        RESULT_FILE
+    )
 
 
 # ============================================================
-# 10. COMMAND-LINE INTERFACE
+# MAIN TEST
 # ============================================================
 
 def main():
 
+    print()
+    print("=" * 75)
+    print("YieldROI - Integrated Pipeline Test")
+    print("=" * 75)
+
+    print()
     print(
-        "\nYieldROI - Integrated Yield + ROI"
+        "Test case:"
     )
 
     print(
-        "------------------------------------"
+        "Thanjavur / Rice / Kharif / 2022 / 100 ha"
     )
 
     try:
 
-        district = input(
-            "\nEnter district: "
-        ).strip()
-
-        crop = input(
-            "Enter crop: "
-        ).strip()
-
-        season = input(
-            "Enter season: "
-        ).strip()
-
-        year = input(
-            "Enter year: "
-        ).strip()
-
-        area = input(
-            "Enter area (hectares): "
-        ).strip()
-
-        # ----------------------------------------------------
-        # Run
-        # ----------------------------------------------------
-
         result = run_pipeline(
-            district=district,
-            crop=crop,
-            season=season,
-            year=year,
-            area=area
-        )
 
-        # ----------------------------------------------------
-        # Display
-        # ----------------------------------------------------
+            district="Thanjavur",
+
+            crop="Rice",
+
+            season="Kharif",
+
+            year=2022,
+
+            area=100,
+
+        )
 
         display_result(
             result
         )
 
-        # ----------------------------------------------------
-        # Save
-        # ----------------------------------------------------
-
-        output_path = save_result(
+        save_result(
             result
         )
 
+    except Exception as e:
+
+        print()
         print(
-            "\nIntegrated result saved to:"
+            "ERROR:"
         )
 
         print(
-            output_path
+            str(e)
         )
 
-    except Exception as error:
-
-        print(
-            "\nERROR"
-        )
-
-        print(
-            "-" * 70
-        )
-
-        print(
-            error
-        )
-
-        print(
-            "-" * 70
-        )
-
-
-# ============================================================
-# ENTRY POINT
-# ============================================================
 
 if __name__ == "__main__":
-
     main()

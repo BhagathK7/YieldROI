@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        YieldROI — Analysis Result
+    </title>
+
+
+    <!-- Custom Fonts -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Main CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="page-shell">
+
+
+    <!-- =============================================
+         NAVBAR
+    ============================================== -->
+
+    <header class="navbar">
+
+
+        <a
+            class="brand"
+            href="/"
+        >
+
+            <span class="brand-mark">
+
+                <svg viewBox="0 0 48 48">
+
+                    <path d="
+                        M38.5 7.5
+                        C25 8.1 15.3 14.1 12.1 25.7
+                        C10.9 30.1 12.2 34.5 15.8 37.6
+                        C19.6 27.5 26 20.9 35.5 17.5
+                        C27.2 22.5 21.4 28.8 18.1 37.3
+                        C27 35.9 33.3 29.6 36.7 20.5
+                        C38.1 16.8 38.6 12 38.5 7.5Z">
+                    </path>
+
+                    <path d="
+                        M10.4 8.8
+                        C15.5 13.9 19.1 19 21.2 24.1">
+                    </path>
+
+                </svg>
+
+            </span>
+
+
+            <span class="brand-name">
+                YieldROI
+            </span>
+
+        </a>
+
+
+        <div class="brand-divider"></div>
+
+
+        <div class="tagline">
+
+            Predict
+
+            <span>•</span>
+
+            Compare
+
+            <span>•</span>
+
+            Plan
+
+            <span>•</span>
+
+            Grow
+
+        </div>
+
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/#about">
+                About
+            </a>
+
+            <a href="/#methodology">
+                Methodology
+            </a>
+
+            <a href="/#contact">
+                Contact
+            </a>
+
+        </nav>
+
+
+    </header>
+
+
+
+    <!-- =============================================
+         RESULT PAGE
+    ============================================== -->
+
+    <main class="result-page">
+
+
+        <section class="result-hero">
+
+
+            <div class="result-intro">
+
+
+                <div class="eyebrow">
+
+                    <span class="mini-leaf">
+                        ◒
+                    </span>
+
+                    ANALYSIS COMPLETE
+
+                </div>
+
+
+
+                <h1>
+
+                    Your Crop
+
+                    <br>
+
+                    <em>Analysis</em>
+
+                </h1>
+
+
+
+                <p>
+
+                    Here is your YieldROI prediction,
+                    official benchmark comparison and
+                    estimated return analysis.
+
+                </p>
+
+
+            </div>
+
+
+
+            <!-- =====================================
+                 MAIN YIELD CARD
+            ====================================== -->
+
+            <div class="main-result-card">
+
+
+                <div class="result-card-header">
+
+
+                    <div>
+
+                        <span class="result-kicker">
+                            PREDICTED YIELD
+                        </span>
+
+                        <h2>
+                            {{ result.crop }}
+                        </h2>
+
+                    </div>
+
+
+                    <div class="result-leaf">
+                        ♧
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="big-yield">
+
+                    {{ "%.3f"|format(
+                        result.predicted_yield
+                    ) }}
+
+                    <span>
+                        tonnes / hectare
+                    </span>
+
+                </div>
+
+
+
+                <div class="location-line">
+
+                    {{ result.district }}
+
+                    <span>•</span>
+
+                    {{ result.season }}
+
+                    <span>•</span>
+
+                    {{ result.year }}
+
+                </div>
+
+
+
+                {% if result.roi.available %}
+
+                    <div class="production-pill">
+
+                        Total expected production:
+
+                        <strong>
+
+                            {{
+                                "%.3f"|format(
+                                    result.roi.production_tonnes
+                                )
+                            }}
+
+                            tonnes
+
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             BENCHMARK + ROI
+        ============================================== -->
+
+        <section class="analysis-grid">
+
+
+            <!-- =====================================
+                 BENCHMARK
+            ====================================== -->
+
+            <div class="analysis-card">
+
+
+                <div class="analysis-heading">
+
+
+                    <span class="analysis-icon">
+                        ▥
+                    </span>
+
+
+                    <div>
+
+                        <span>
+                            OFFICIAL COMPARISON
+                        </span>
+
+                        <h3>
+                            Benchmark
+                        </h3>
+
+                    </div>
+
+
+                </div>
+
+
+
+                {% if result.benchmark.available %}
+
+
+                    <div class="metric-large">
+
+                        {{
+                            "%.3f"|format(
+                                result.benchmark.official_yield
+                            )
+                        }}
+
+                        <small>
+                            tonnes / hectare
+                        </small>
+
+                    </div>
+
+
+
+                    <div class="comparison-row">
+
+
+                        <div>
+
+                            <span>
+                                Difference
+                            </span>
+
+                            <strong>
+
+                                {{
+                                    "%+.3f"|format(
+                                        result.benchmark.difference
+                                    )
+                                }}
+
+                                t/ha
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <span>
+                                Variation
+                            </span>
+
+                            <strong>
+
+                                {{
+                                    "%+.2f"|format(
+                                        result.benchmark.difference_pct
+                                    )
+                                }}%
+
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="status-pill">
+
+                        <span class="status-dot"></span>
+
+                        {{ result.benchmark.performance }}
+
+                    </div>
+
+
+                    {% if result.benchmark.message %}
+
+                        <div class="result-note">
+                            {{ result.benchmark.message }}
+                        </div>
+
+                    {% endif %}
+
+
+                {% else %}
+
+
+                    <div class="unavailable">
+
+                        Official benchmark is not available
+                        for this crop/location combination.
+
+                        {% if result.benchmark.message %}
+
+                            <br><br>
+
+                            {{ result.benchmark.message }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+
+            <!-- =====================================
+                 ROI
+            ====================================== -->
+
+            <div class="analysis-card">
+
+
+                <div class="analysis-heading">
+
+
+                    <span class="analysis-icon">
+                        ₹
+                    </span>
+
+
+                    <div>
+
+                        <span>
+                            ECONOMIC ANALYSIS
+                        </span>
+
+                        <h3>
+                            Estimated ROI
+                        </h3>
+
+                    </div>
+
+
+                </div>
+
+
+
+                {% if result.roi.available %}
+
+
+                    <div class="metric-large">
+
+                        {{
+                            "%.2f"|format(
+                                result.roi.roi
+                            )
+                        }}%
+
+                        <small>
+                            return on investment
+                        </small>
+
+                    </div>
+
+
+
+                    <div class="financial-list">
+
+
+                        <div>
+
+                            <span>
+                                Total Cost
+                            </span>
+
+                            <strong>
+
+                                ₹{{ "{:,.0f}".format(
+                                    result.roi.total_cost
+                                ) }}
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <span>
+                                Expected Revenue
+                            </span>
+
+                            <strong>
+
+                                ₹{{ "{:,.0f}".format(
+                                    result.roi.revenue
+                                ) }}
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <span>
+                                Estimated Profit
+                            </span>
+
+                            <strong
+                                class="{% if result.roi.profit >= 0 %}profit{% else %}loss{% endif %}"
+                            >
+
+                                ₹{{ "{:,.0f}".format(
+                                    result.roi.profit
+                                ) }}
+
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            status-pill
+                            {% if result.roi.profit < 0 %}
+                                loss-pill
+                            {% endif %}
+                        "
+                    >
+
+                        <span class="status-dot"></span>
+
+                        {{ result.roi.status }}
+
+                    </div>
+
+
+                {% else %}
+
+
+                    <div class="unavailable">
+
+                        {{ result.roi.message }}
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             INPUT SUMMARY
+        ============================================== -->
+
+        <section class="input-summary">
+
+
+            <div>
+
+                <span>
+                    DISTRICT
+                </span>
+
+                <strong>
+                    {{ result.district }}
+                </strong>
+
+            </div>
+
+
+
+            <div>
+
+                <span>
+                    CROP
+                </span>
+
+                <strong>
+                    {{ result.crop }}
+                </strong>
+
+            </div>
+
+
+
+            <div>
+
+                <span>
+                    SEASON
+                </span>
+
+                <strong>
+                    {{ result.season }}
+                </strong>
+
+            </div>
+
+
+
+            <div>
+
+                <span>
+                    YEAR
+                </span>
+
+                <strong>
+                    {{ result.year }}
+                </strong>
+
+            </div>
+
+
+
+            <div>
+
+                <span>
+                    AREA
+                </span>
+
+                <strong>
+                    {{ "%.2f"|format(result.area) }} ha
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             ACTIONS
+        ============================================== -->
+
+        <section class="result-actions">
+
+
+            <a
+                href="/"
+                class="secondary-button"
+            >
+
+                ←
+
+                New Prediction
+
+            </a>
+
+
+
+            <button
+                type="button"
+                onclick="window.print()"
+                class="secondary-button"
+            >
+
+                Print Analysis
+
+            </button>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             DISCLAIMER
+        ============================================== -->
+
+        <div class="research-note">
+
+            <span>
+                ◆
+            </span>
+
+            Yield and ROI values are estimates generated
+            from the project's trained model and official
+            reference datasets. They should be treated as
+            decision-support information, not guaranteed
+            farm-level outcomes.
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+<script
+    src="{{ url_for('static', filename='script.js') }}"
+></script>
+
+
+</body>
+
+</html>

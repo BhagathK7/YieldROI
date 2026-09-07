@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        YieldROI — Grow Smarter with Data
+    </title>
+
+
+    <!-- Custom Fonts -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Main CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="page-shell">
+
+
+    <!-- =================================================
+         NAVIGATION
+    ================================================== -->
+
+    <header class="navbar">
+
+        <a
+            class="brand"
+            href="/"
+        >
+
+            <span class="brand-mark">
+
+                <svg
+                    viewBox="0 0 48 48"
+                    aria-hidden="true"
+                >
+
+                    <path d="
+                        M38.5 7.5
+                        C25 8.1 15.3 14.1 12.1 25.7
+                        C10.9 30.1 12.2 34.5 15.8 37.6
+                        C19.6 27.5 26 20.9 35.5 17.5
+                        C27.2 22.5 21.4 28.8 18.1 37.3
+                        C27 35.9 33.3 29.6 36.7 20.5
+                        C38.1 16.8 38.6 12 38.5 7.5Z">
+                    </path>
+
+                    <path d="
+                        M10.4 8.8
+                        C15.5 13.9 19.1 19 21.2 24.1">
+                    </path>
+
+                </svg>
+
+            </span>
+
+
+            <span class="brand-name">
+                YieldROI
+            </span>
+
+        </a>
+
+
+        <div class="brand-divider"></div>
+
+
+        <div class="tagline">
+
+            Predict
+
+            <span>•</span>
+
+            Compare
+
+            <span>•</span>
+
+            Plan
+
+            <span>•</span>
+
+            Grow
+
+        </div>
+
+
+        <nav>
+
+            <a
+                class="active"
+                href="/"
+            >
+                Home
+            </a>
+
+            <a href="#about">
+                About
+            </a>
+
+            <a href="#methodology">
+                Methodology
+            </a>
+
+            <a href="#contact">
+                Contact
+            </a>
+
+        </nav>
+
+    </header>
+
+
+
+    <!-- =================================================
+         MAIN
+    ================================================== -->
+
+    <main>
+
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
+
+        <section class="hero">
+
+
+            <!-- =========================================
+                 LEFT SIDE
+            ========================================== -->
+
+            <div class="hero-copy">
+
+
+                <div class="eyebrow">
+
+                    <span class="mini-leaf">
+                        ◒
+                    </span>
+
+                    SMART AGRICULTURE FOR A BRIGHTER TOMORROW
+
+                </div>
+
+
+
+                <h1>
+
+                    Grow Smarter
+
+                    <br>
+
+                    with
+
+                    <em>Data</em>
+
+                </h1>
+
+
+
+                <p class="hero-description">
+
+                    Predict crop yields, compare with official
+                    benchmarks, estimate ROI and get personalized
+                    recommendations — all in one place.
+
+                </p>
+
+
+
+                <!-- Feature icons -->
+
+                <div class="feature-row">
+
+
+                    <div class="feature">
+
+                        <span class="feature-icon">
+                            ◒
+                        </span>
+
+                        <span>
+                            ML<br>
+                            Prediction
+                        </span>
+
+                    </div>
+
+
+
+                    <div class="feature">
+
+                        <span class="feature-icon">
+                            ▥
+                        </span>
+
+                        <span>
+                            Official<br>
+                            Benchmarks
+                        </span>
+
+                    </div>
+
+
+
+                    <div class="feature">
+
+                        <span class="feature-icon rupee-icon">
+                            ₹
+                        </span>
+
+                        <span>
+                            ROI<br>
+                            Analysis
+                        </span>
+
+                    </div>
+
+
+
+                    <div class="feature">
+
+                        <span class="feature-icon">
+                            ♧
+                        </span>
+
+                        <span>
+                            Fertilizer<br>
+                            Recommendations
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- Decorative handwritten text -->
+
+                <div class="handwritten">
+
+                    Better
+
+                    <br>
+
+                    Farming
+
+                    <br>
+
+                    <span>
+
+                        Brighter
+
+                        <br>
+
+                        Tomorrow
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =========================================
+                 RIGHT SIDE — PREDICTION CARD
+            ========================================== -->
+
+            <div class="form-column">
+
+
+                <form
+                    class="predict-card"
+                    method="POST"
+                    action="/predict"
+                >
+
+
+                    <!-- Card heading -->
+
+                    <div class="card-heading">
+
+
+                        <div class="heading-icon">
+
+                            <svg viewBox="0 0 48 48">
+
+                                <path d="M24 40V11"></path>
+
+                                <path d="
+                                    M24 20
+                                    C18 20 13 16 12 9
+                                    C19 9 24 13 24 20">
+                                </path>
+
+                                <path d="
+                                    M24 27
+                                    C30 27 35 23 36 16
+                                    C29 16 24 20 24 27">
+                                </path>
+
+                                <path d="
+                                    M24 33
+                                    C18 33 13 29 12 22
+                                    C19 22 24 26 24 33">
+                                </path>
+
+                            </svg>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <h2>
+                                Get Started
+                            </h2>
+
+                            <p>
+                                Enter crop details to predict yield
+                                and analyze returns
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =================================
+                         FORM FIELDS
+                    ================================== -->
+
+                    <div class="form-fields">
+
+
+                        <!-- District -->
+
+                        <label class="field">
+
+                            <span class="field-label">
+
+                                <span class="field-symbol">
+                                    ⌖
+                                </span>
+
+                                District
+
+                            </span>
+
+
+                            <select
+                                name="district"
+                                required
+                            >
+
+                                {% for item in districts %}
+
+                                    <option
+                                        value="{{ item }}"
+                                        {% if defaults.district == item %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ item }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <span class="chevron">
+                                ⌄
+                            </span>
+
+                        </label>
+
+
+
+                        <!-- Crop -->
+
+                        <label class="field">
+
+                            <span class="field-label">
+
+                                <span class="field-symbol">
+                                    ◈
+                                </span>
+
+                                Crop
+
+                            </span>
+
+
+                            <select
+                                name="crop"
+                                required
+                            >
+
+                                {% for item in crops %}
+
+                                    <option
+                                        value="{{ item }}"
+                                        {% if defaults.crop == item %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ item }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <span class="chevron">
+                                ⌄
+                            </span>
+
+                        </label>
+
+
+
+                        <!-- Season -->
+
+                        <label class="field">
+
+                            <span class="field-label">
+
+                                <span class="field-symbol">
+                                    ☼
+                                </span>
+
+                                Season
+
+                            </span>
+
+
+                            <select
+                                name="season"
+                                required
+                            >
+
+                                {% for item in seasons %}
+
+                                    <option
+                                        value="{{ item }}"
+                                        {% if defaults.season == item %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ item }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <span class="chevron">
+                                ⌄
+                            </span>
+
+                        </label>
+
+
+
+                        <!-- Year -->
+
+                        <label class="field">
+
+                            <span class="field-label">
+
+                                <span class="field-symbol">
+                                    ▣
+                                </span>
+
+                                Year
+
+                            </span>
+
+
+                            <select
+                                name="year"
+                                required
+                            >
+
+                                {% for item in years %}
+
+                                    <option
+                                        value="{{ item }}"
+                                        {% if defaults.year|string == item|string %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ item }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <span class="chevron">
+                                ⌄
+                            </span>
+
+                        </label>
+
+
+
+                        <!-- Area -->
+
+                        <label class="field">
+
+                            <span class="field-label">
+
+                                <span class="field-symbol">
+                                    ♧
+                                </span>
+
+                                Area
+
+                                <small>
+                                    (hectares)
+                                </small>
+
+                            </span>
+
+
+                            <input
+                                type="number"
+                                name="area"
+                                min="0.01"
+                                step="0.01"
+                                value="{{ defaults.area }}"
+                                required
+                            >
+
+                        </label>
+
+
+                    </div>
+
+
+
+                    <!-- Error -->
+
+                    {% if error %}
+
+                        <div class="error-box">
+                            {{ error }}
+                        </div>
+
+                    {% endif %}
+
+
+
+                    <!-- =================================
+                         PREDICT BUTTON
+                    ================================== -->
+
+                    <button
+                        class="predict-button"
+                        type="submit"
+                    >
+
+                        <span>
+                            ♧
+                        </span>
+
+                        Predict &amp; Analyze
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+
+                    <!-- Trust -->
+
+                    <div class="trust-line">
+
+                        <span>
+                            ◆
+                        </span>
+
+                        Powered by official data.
+                        Built for a sustainable tomorrow.
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =============================================
+             DATA STATISTICS
+        ============================================== -->
+
+        <section class="stats-strip">
+
+
+            <div class="stat">
+
+                <span class="stat-icon">
+                    ♧
+                </span>
+
+                <div>
+
+                    <strong>
+                        38
+                    </strong>
+
+                    <small>
+                        Benchmark Districts
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="stat">
+
+                <span class="stat-icon">
+                    ◒
+                </span>
+
+                <div>
+
+                    <strong>
+                        52
+                    </strong>
+
+                    <small>
+                        Benchmark Crops
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="stat">
+
+                <span class="stat-icon">
+                    ▤
+                </span>
+
+                <div>
+
+                    <strong>
+                        3,458
+                    </strong>
+
+                    <small>
+                        Benchmark Records
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="stat">
+
+                <span class="stat-icon">
+                    ⌁
+                </span>
+
+                <div>
+
+                    <strong>
+                        6
+                    </strong>
+
+                    <small>
+                        Seasons
+                    </small>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             ABOUT
+        ============================================== -->
+
+        <section
+            class="soft-section"
+            id="about"
+        >
+
+            <span>
+                YIELDROI
+            </span>
+
+            <h2>
+                From prediction to a better farming decision.
+            </h2>
+
+        </section>
+
+
+
+        <!-- =============================================
+             METHODOLOGY
+        ============================================== -->
+
+        <section
+            class="soft-section"
+            id="methodology"
+        >
+
+            <span>
+                METHODOLOGY
+            </span>
+
+            <h2>
+                ML prediction · Official comparison · ROI ·
+                Recommendations
+            </h2>
+
+        </section>
+
+
+
+        <!-- =============================================
+             CONTACT
+        ============================================== -->
+
+        <section
+            class="soft-section"
+            id="contact"
+        >
+
+            <span>
+                CONTACT
+            </span>
+
+            <h2>
+                Built as an academic research project for
+                intelligent agriculture.
+            </h2>
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+<!-- JavaScript -->
+
+<script
+    src="{{ url_for('static', filename='script.js') }}"
+></script>
+
+
+</body>
+
+</html>
