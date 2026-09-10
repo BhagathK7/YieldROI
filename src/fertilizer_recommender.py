@@ -435,6 +435,7 @@ class FertilizerRecommender:
                     return str(value)
 
         # Fallback search
+
         nutrient_key = nutrient.replace(
             " ",
             "_"
@@ -986,6 +987,256 @@ class FertilizerRecommender:
         return result
 
     # ========================================================
+    # FERTILIZER PRODUCT CALCULATION
+    # ========================================================
+
+    @staticmethod
+    def calculate_fertilizer_products(
+        nitrogen,
+        phosphorus,
+        potassium
+    ):
+        """
+        Convert the recommended N-P2O5-K2O requirement
+        into commercial fertilizer quantities.
+
+        Fertilizer grades:
+            DAP  = 18-46-0
+            Urea = 46-0-0
+            MOP  = 0-0-60
+
+        Calculation:
+            1. DAP satisfies the P2O5 requirement.
+            2. Nitrogen supplied by DAP is deducted.
+            3. Urea supplies the remaining nitrogen.
+            4. MOP supplies the required K2O.
+
+        This is deterministic nutrient balancing.
+        It is NOT an ML prediction.
+        """
+
+        values = {
+            "nitrogen": nitrogen,
+            "phosphorus": phosphorus,
+            "potassium": potassium
+        }
+
+        for name, value in values.items():
+
+            if value is None:
+                raise ValueError(
+                    f"{name.title()} requirement is missing."
+                )
+
+            try:
+
+                numeric = float(value)
+
+            except (ValueError, TypeError):
+
+                raise ValueError(
+                    f"{name.title()} requirement "
+                    f"is not numeric."
+                )
+
+            if numeric < 0:
+                raise ValueError(
+                    f"{name.title()} requirement "
+                    f"cannot be negative."
+                )
+
+            values[name] = numeric
+
+        nitrogen_required = values["nitrogen"]
+        phosphorus_required = values["phosphorus"]
+        potassium_required = values["potassium"]
+
+        # ----------------------------------------------------
+        # Fertilizer nutrient percentages
+        # ----------------------------------------------------
+
+        DAP_N = 0.18
+        DAP_P2O5 = 0.46
+
+        UREA_N = 0.46
+
+        MOP_K2O = 0.60
+
+        # ----------------------------------------------------
+        # DAP
+        # ----------------------------------------------------
+
+        dap_kg = (
+            phosphorus_required / DAP_P2O5
+            if phosphorus_required > 0
+            else 0.0
+        )
+
+        nitrogen_from_dap = dap_kg * DAP_N
+
+        # ----------------------------------------------------
+        # Urea
+        # ----------------------------------------------------
+
+        remaining_nitrogen = max(
+            nitrogen_required - nitrogen_from_dap,
+            0.0
+        )
+
+        urea_kg = (
+            remaining_nitrogen / UREA_N
+            if remaining_nitrogen > 0
+            else 0.0
+        )
+
+        # ----------------------------------------------------
+        # MOP
+        # ----------------------------------------------------
+
+        mop_kg = (
+            potassium_required / MOP_K2O
+            if potassium_required > 0
+            else 0.0
+        )
+
+        # ----------------------------------------------------
+        # Final nutrient balance
+        # ----------------------------------------------------
+
+        supplied_nitrogen = (
+            nitrogen_from_dap
+            + (urea_kg * UREA_N)
+        )
+
+        supplied_phosphorus = (
+            dap_kg * DAP_P2O5
+        )
+
+        supplied_potassium = (
+            mop_kg * MOP_K2O
+        )
+
+        return {
+
+            "method": (
+                "DAP first for P2O5, Urea for remaining N, "
+                "and MOP for K2O."
+            ),
+
+            "fertilizer_grades": {
+                "DAP": "18-46-0",
+                "Urea": "46-0-0",
+                "MOP": "0-0-60"
+            },
+
+            "products": [
+
+                {
+                    "name": "DAP",
+                    "grade": "18-46-0",
+                    "kg_per_ha": round(
+                        dap_kg,
+                        2
+                    ),
+                    "nutrient_contribution": {
+                        "N_kg": round(
+                            nitrogen_from_dap,
+                            2
+                        ),
+                        "P2O5_kg": round(
+                            supplied_phosphorus,
+                            2
+                        ),
+                        "K2O_kg": 0.0
+                    }
+                },
+
+                {
+                    "name": "Urea",
+                    "grade": "46-0-0",
+                    "kg_per_ha": round(
+                        urea_kg,
+                        2
+                    ),
+                    "nutrient_contribution": {
+                        "N_kg": round(
+                            urea_kg * UREA_N,
+                            2
+                        ),
+                        "P2O5_kg": 0.0,
+                        "K2O_kg": 0.0
+                    }
+                },
+
+                {
+                    "name": "MOP",
+                    "grade": "0-0-60",
+                    "kg_per_ha": round(
+                        mop_kg,
+                        2
+                    ),
+                    "nutrient_contribution": {
+                        "N_kg": 0.0,
+                        "P2O5_kg": 0.0,
+                        "K2O_kg": round(
+                            supplied_potassium,
+                            2
+                        )
+                    }
+                }
+
+            ],
+
+            "required_npk": {
+                "N_kg_per_ha": round(
+                    nitrogen_required,
+                    2
+                ),
+                "P2O5_kg_per_ha": round(
+                    phosphorus_required,
+                    2
+                ),
+                "K2O_kg_per_ha": round(
+                    potassium_required,
+                    2
+                )
+            },
+
+            "supplied_npk": {
+                "N_kg_per_ha": round(
+                    supplied_nitrogen,
+                    2
+                ),
+                "P2O5_kg_per_ha": round(
+                    supplied_phosphorus,
+                    2
+                ),
+                "K2O_kg_per_ha": round(
+                    supplied_potassium,
+                    2
+                )
+            },
+
+            "balance_check": {
+                "nitrogen_difference": round(
+                    supplied_nitrogen
+                    - nitrogen_required,
+                    6
+                ),
+                "phosphorus_difference": round(
+                    supplied_phosphorus
+                    - phosphorus_required,
+                    6
+                ),
+                "potassium_difference": round(
+                    supplied_potassium
+                    - potassium_required,
+                    6
+                )
+            }
+        }
+
+    # ========================================================
     # MAIN RECOMMENDATION
     # ========================================================
 
@@ -1094,6 +1345,26 @@ class FertilizerRecommender:
         )
 
         # ----------------------------------------------------
+        # Fertilizer product quantities
+        # ----------------------------------------------------
+
+        fertilizer_products = None
+
+        if (
+            npk["nitrogen"] is not None
+            and npk["phosphorus"] is not None
+            and npk["potassium"] is not None
+        ):
+
+            fertilizer_products = (
+                self.calculate_fertilizer_products(
+                    nitrogen=npk["nitrogen"],
+                    phosphorus=npk["phosphorus"],
+                    potassium=npk["potassium"]
+                )
+            )
+
+        # ----------------------------------------------------
         # Metadata
         # ----------------------------------------------------
 
@@ -1150,6 +1421,10 @@ class FertilizerRecommender:
                 "potassium"
             ],
 
+            # NEW:
+            # Commercial fertilizer quantities
+            "fertilizer_products": fertilizer_products,
+
             "applicability_type": (
                 applicability_type
             ),
@@ -1160,7 +1435,8 @@ class FertilizerRecommender:
 
             "basis": (
                 "Tamil Nadu soil-status data + "
-                "TNAU fertilizer recommendation rules"
+                "TNAU fertilizer recommendation rules "
+                "+ deterministic fertilizer product calculation"
             )
         }
 
@@ -1309,6 +1585,76 @@ def print_recommendation(result):
             print(
                 f"\nN:P₂O₅:K₂O        : "
                 f"{n:g}:{p:g}:{k:g}"
+            )
+
+        # ----------------------------------------------------
+        # PRODUCT QUANTITIES
+        # ----------------------------------------------------
+
+        fertilizer_products = result.get(
+            "fertilizer_products"
+        )
+
+        if (
+            fertilizer_products
+            and isinstance(
+                fertilizer_products,
+                dict
+            )
+        ):
+
+            print("\n" + "-" * 65)
+            print("COMMERCIAL FERTILIZER PRODUCTS")
+            print("-" * 65)
+
+            for product in fertilizer_products.get(
+                "products",
+                []
+            ):
+
+                print(
+                    f"\n{product.get('name', '-')}"
+                    f" ({product.get('grade', '-')})"
+                )
+
+                print(
+                    f"  Quantity : "
+                    f"{product.get('kg_per_ha', 0)} kg/ha"
+                )
+
+            print(
+                "\nCalculation:"
+            )
+
+            print(
+                fertilizer_products.get(
+                    "method",
+                    "-"
+                )
+            )
+
+            balance = fertilizer_products.get(
+                "balance_check",
+                {}
+            )
+
+            print(
+                "\nNutrient balance:"
+            )
+
+            print(
+                f"  N difference    : "
+                f"{balance.get('nitrogen_difference', '-')}"
+            )
+
+            print(
+                f"  P₂O₅ difference : "
+                f"{balance.get('phosphorus_difference', '-')}"
+            )
+
+            print(
+                f"  K₂O difference  : "
+                f"{balance.get('potassium_difference', '-')}"
             )
 
         print(

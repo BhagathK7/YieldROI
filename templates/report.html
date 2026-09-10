@@ -295,6 +295,85 @@
                 #87938d !important;
         }
 
+            /* =====================================================
+            FERTILIZER PRODUCTS
+            ===================================================== */
+
+            .report-fertilizer-products {
+                margin-top: 25px;
+                padding-top: 22px;
+                border-top: 1px solid #e9eeeb;
+            }
+
+            .report-fertilizer-products-title {
+                color: #174b36;
+                font-size: 15px;
+                font-weight: 700;
+                margin-bottom: 13px;
+            }
+
+            .report-fertilizer-product-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+
+            .report-fertilizer-product {
+                background: #f7f9f7;
+                border: 1px solid #e4ebe6;
+                border-radius: 14px;
+                padding: 16px;
+            }
+
+            .report-fertilizer-product-name {
+                color: #174b36;
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+            .report-fertilizer-product-grade {
+                color: #7a8981;
+                font-size: 11px;
+                margin-top: 2px;
+            }
+
+            .report-fertilizer-product-amount {
+                color: #23734c;
+                font-size: 22px;
+                font-weight: 700;
+                margin-top: 10px;
+            }
+
+            .report-fertilizer-product-unit {
+                color: #718078;
+                font-size: 11px;
+            }
+
+            .report-fertilizer-area-total {
+                margin-top: 14px;
+                padding: 15px 16px;
+                background: #edf7ef;
+                border: 1px solid #d8eadc;
+                border-radius: 12px;
+                color: #52705e;
+                font-size: 13px;
+                line-height: 1.55;
+            }
+
+            .report-fertilizer-area-total strong {
+                color: #174b36;
+            }
+
+            .report-fertilizer-basis {
+                margin-top: 14px;
+                padding: 12px 14px;
+                background: #fafbf9;
+                border-radius: 11px;
+                color: #718078;
+                font-size: 12px;
+                line-height: 1.55;
+            }
+
 
         /* =====================================================
            EXECUTIVE SUMMARY
@@ -1320,6 +1399,10 @@
 
 
         @media (max-width: 600px) {
+
+            .report-fertilizer-product-grid {
+            grid-template-columns: 1fr;
+        }
 
             .report-topbar {
 
@@ -2497,7 +2580,42 @@
                 --
 
             </div>
+            <div
+                class="report-fertilizer-products"
+                id="reportFertilizerProducts"
+                style="display:none;">
 
+                <div class="report-fertilizer-products-title">
+
+                    <span class="language-en">
+                        Recommended Fertilizer Products
+                    </span>
+
+                    <span class="language-ta">
+                        பரிந்துரைக்கப்பட்ட உரங்கள்
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="report-fertilizer-product-grid"
+                    id="reportFertilizerProductGrid">
+                </div>
+
+
+                <div
+                    class="report-fertilizer-area-total"
+                    id="reportFertilizerAreaTotal">
+                </div>
+
+
+                <div
+                    class="report-fertilizer-basis"
+                    id="reportFertilizerBasis">
+                </div>
+
+            </div>
 
             <div
                 id="soilSection"
@@ -2578,15 +2696,15 @@
 
     <script>
 
+        
 
         // =====================================================
         // LANGUAGE
         // =====================================================
 
-        let reportLanguage =
-            sessionStorage.getItem(
-                "yieldroi_language"
-            ) || "en";
+        // English is always the default when the report opens.
+// Tamil is shown only after the user explicitly toggles it.
+        let reportLanguage = "en";
 
 
         function toggleReportLanguage() {
@@ -2812,7 +2930,8 @@
         // =====================================================
 
         function populateFertilizer(
-            fertilizer
+            fertilizer,
+            area=0
         ) {
 
             const message =
@@ -2891,6 +3010,157 @@
                 k !== undefined
                     ? formatNumber(k, 1)
                     : "--";
+
+        // =================================================
+        // FERTILIZER PRODUCTS
+        // =================================================
+
+        const fertilizerProducts =
+            fertilizer.fertilizer_products;
+
+        const productSection =
+            document.getElementById(
+                "reportFertilizerProducts"
+            );
+
+        const productGrid =
+            document.getElementById(
+                "reportFertilizerProductGrid"
+            );
+
+        const areaTotal =
+            document.getElementById(
+                "reportFertilizerAreaTotal"
+            );
+
+        const basis =
+            document.getElementById(
+                "reportFertilizerBasis"
+            );
+
+        if (
+            productSection &&
+            productGrid &&
+            areaTotal &&
+            basis &&
+            fertilizerProducts &&
+            Array.isArray(
+                fertilizerProducts.products
+            )
+        ) {
+
+            productGrid.innerHTML = "";
+
+            fertilizerProducts.products.forEach(
+                function(product) {
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+                    card.className =
+                        "report-fertilizer-product";
+
+                    card.innerHTML = `
+                        <div
+                            class="report-fertilizer-product-name">
+
+                            ${product.name || "--"}
+
+                        </div>
+
+                        <div
+                            class="report-fertilizer-product-grade">
+
+                            ${product.grade || "--"}
+
+                        </div>
+
+                        <div
+                            class="report-fertilizer-product-amount">
+
+                            ${Number(
+                                product.kg_per_ha || 0
+                            ).toFixed(2)}
+
+                        </div>
+
+                        <div
+                            class="report-fertilizer-product-unit">
+
+                            kg / hectare
+
+                        </div>
+                    `;
+
+                    productGrid.appendChild(card);
+                }
+            );
+
+            const enteredArea = Number(area) || 0;
+
+            const totalLines =
+                fertilizerProducts.products
+                    .map(
+                        function(product) {
+
+                            const total =
+                                Number(
+                                    product.kg_per_ha || 0
+                                ) * enteredArea;
+
+                            return `
+                                <strong>
+                                    ${product.name || "--"}
+                                </strong>:
+                                ${total.toFixed(2)} kg
+                            `;
+                        }
+                    )
+                    .join(" &nbsp;•&nbsp; ");
+
+            areaTotal.innerHTML = `
+                <span class="language-en">
+                    For your
+                    <strong>
+                        ${enteredArea.toFixed(2)} ha
+                    </strong>
+                    area:
+                </span>
+
+                <span class="language-ta">
+                    உங்கள்
+                    <strong>
+                        ${enteredArea.toFixed(2)} ஹெக்டேர்
+                    </strong>
+                    பரப்பிற்கு:
+                </span>
+
+                <br>
+
+                ${totalLines}
+            `;
+
+            basis.innerHTML = `
+                <span class="language-en">
+                    Calculation basis:
+                    DAP 18-46-0,
+                    Urea 46-0-0 and
+                    MOP 0-0-60.
+                </span>
+
+                <span class="language-ta">
+                    கணக்கீட்டு அடிப்படை:
+                    DAP 18-46-0,
+                    Urea 46-0-0 மற்றும்
+                    MOP 0-0-60.
+                </span>
+            `;
+
+            productSection.style.display =
+                "block";
+        }
 
 
             const soil =
@@ -3353,7 +3623,8 @@
             // =================================================
 
             populateFertilizer(
-                fertilizer
+                fertilizer,
+                input.area
             );
 
 
