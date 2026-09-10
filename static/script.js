@@ -228,11 +228,13 @@ let currentLanguage = "en";
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
+    async function () {
 
-        setupYears();
+        await setupPredictionOptions();
 
         setupDropdownTranslations();
+
+        setupDependentDropdowns();
 
         setupForm();
 
@@ -243,38 +245,503 @@ document.addEventListener(
 
 
 // ============================================================
-// YEAR SETUP
+// DYNAMIC PREDICTION OPTIONS
 // ============================================================
 
-function setupYears() {
+let predictionOptions = {};
+
+
+// ============================================================
+// LOAD VALID OPTIONS FROM BACKEND
+// ============================================================
+
+async function setupPredictionOptions() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/prediction-options"
+            );
+
+        const result =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+
+            throw new Error(
+                result.error ||
+                "Could not load prediction options."
+            );
+        }
+
+        predictionOptions =
+            result.options || {};
+
+        initializeDependentDropdowns();
+
+    } catch (error) {
+
+        console.error(
+            "Prediction option loading failed:",
+            error
+        );
+
+        const errorBox =
+            document.getElementById(
+                "formError"
+            );
+
+        if (errorBox) {
+
+            errorBox.textContent =
+                currentLanguage === "ta"
+                    ? "கிடைக்கக்கூடிய தேர்வுகளை ஏற்ற முடியவில்லை."
+                    : "Could not load the available prediction options.";
+
+        }
+    }
+}
+
+
+// ============================================================
+// INITIALIZE DROPDOWNS
+// ============================================================
+
+function initializeDependentDropdowns() {
+
+    const districtSelect =
+        document.getElementById(
+            "district"
+        );
+
+    const cropSelect =
+        document.getElementById(
+            "crop"
+        );
+
+    const seasonSelect =
+        document.getElementById(
+            "season"
+        );
 
     const yearSelect =
-        document.getElementById("year");
+        document.getElementById(
+            "year"
+        );
+
+    if (
+        !districtSelect ||
+        !cropSelect ||
+        !seasonSelect ||
+        !yearSelect
+    ) {
+        return;
+    }
+
+    // District comes from Flask template.
+
+    // Crop, Season and Year are dependent.
+    clearSelect(
+        cropSelect,
+        "Select Crop"
+    );
+
+    clearSelect(
+        seasonSelect,
+        "Select Season"
+    );
+
+    clearSelect(
+        yearSelect,
+        "Select Year"
+    );
+
+    cropSelect.disabled = true;
+    seasonSelect.disabled = true;
+    yearSelect.disabled = true;
+}
+
+
+// ============================================================
+// DEPENDENT DROPDOWN EVENTS
+// ============================================================
+
+function setupDependentDropdowns() {
+
+    const districtSelect =
+        document.getElementById(
+            "district"
+        );
+
+    const cropSelect =
+        document.getElementById(
+            "crop"
+        );
+
+    const seasonSelect =
+        document.getElementById(
+            "season"
+        );
+
+    if (
+        !districtSelect ||
+        !cropSelect ||
+        !seasonSelect
+    ) {
+        return;
+    }
+
+    districtSelect.addEventListener(
+        "change",
+        function () {
+
+            populateCrops(
+                districtSelect.value
+            );
+
+            clearSelect(
+                seasonSelect,
+                "Select Season"
+            );
+
+            clearSelect(
+                document.getElementById("year"),
+                "Select Year"
+            );
+
+            seasonSelect.disabled = true;
+
+            const yearSelect =
+                document.getElementById(
+                    "year"
+                );
+
+            if (yearSelect) {
+                yearSelect.disabled = true;
+            }
+
+            applyLanguage();
+
+        }
+    );
+
+
+    cropSelect.addEventListener(
+        "change",
+        function () {
+
+            populateSeasons(
+                districtSelect.value,
+                cropSelect.value
+            );
+
+            clearSelect(
+                document.getElementById("year"),
+                "Select Year"
+            );
+
+            const yearSelect =
+                document.getElementById(
+                    "year"
+                );
+
+            if (yearSelect) {
+                yearSelect.disabled = true;
+            }
+
+            applyLanguage();
+
+        }
+    );
+
+
+    seasonSelect.addEventListener(
+        "change",
+        function () {
+
+            populateYears(
+                districtSelect.value,
+                cropSelect.value,
+                seasonSelect.value
+            );
+
+            applyLanguage();
+
+        }
+    );
+}
+
+
+// ============================================================
+// POPULATE CROPS
+// ============================================================
+
+function populateCrops(
+    district
+) {
+
+    const cropSelect =
+        document.getElementById(
+            "crop"
+        );
+
+    if (!cropSelect) {
+        return;
+    }
+
+    clearSelect(
+        cropSelect,
+        "Select Crop"
+    );
+
+    const districtData =
+        predictionOptions[district];
+
+    if (
+        !districtData ||
+        Object.keys(districtData).length === 0
+    ) {
+
+        cropSelect.disabled = true;
+
+        return;
+    }
+
+    const crops =
+        Object.keys(
+            districtData
+        ).sort(
+            function (a, b) {
+                return a.localeCompare(b);
+            }
+        );
+
+    crops.forEach(
+        function (crop) {
+
+            addTranslatedOption(
+                cropSelect,
+                crop,
+                cropTamil
+            );
+
+        }
+    );
+
+    cropSelect.disabled =
+        crops.length === 0;
+}
+
+
+// ============================================================
+// POPULATE SEASONS
+// ============================================================
+
+function populateSeasons(
+    district,
+    crop
+) {
+
+    const seasonSelect =
+        document.getElementById(
+            "season"
+        );
+
+    if (!seasonSelect) {
+        return;
+    }
+
+    clearSelect(
+        seasonSelect,
+        "Select Season"
+    );
+
+    const districtData =
+        predictionOptions[district];
+
+    if (!districtData) {
+
+        seasonSelect.disabled = true;
+
+        return;
+    }
+
+    const cropData =
+        districtData[crop];
+
+    if (!cropData) {
+
+        seasonSelect.disabled = true;
+
+        return;
+    }
+
+    const seasons =
+        Object.keys(
+            cropData
+        ).sort(
+            function (a, b) {
+                return a.localeCompare(b);
+            }
+        );
+
+    seasons.forEach(
+        function (season) {
+
+            addTranslatedOption(
+                seasonSelect,
+                season,
+                seasonTamil
+            );
+
+        }
+    );
+
+    seasonSelect.disabled =
+        seasons.length === 0;
+}
+
+
+// ============================================================
+// POPULATE YEARS
+// ============================================================
+
+function populateYears(
+    district,
+    crop,
+    season
+) {
+
+    const yearSelect =
+        document.getElementById(
+            "year"
+        );
 
     if (!yearSelect) {
         return;
     }
 
+    clearSelect(
+        yearSelect,
+        "Select Year"
+    );
 
-    // Model training data covers 1997-2022.
-    // We keep the prediction interface within
-    // the historical model range.
+    const years =
+        predictionOptions
+            ?.[
+                district
+            ]
+            ?.[
+                crop
+            ]
+            ?.[
+                season
+            ] || [];
 
-    for (
-        let year = 2022;
-        year >= 1997;
-        year--
-    ) {
+    years.forEach(
+        function (year) {
 
-        const option =
-            document.createElement("option");
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-        option.value = year;
+            option.value =
+                year;
 
-        option.textContent = year;
+            option.dataset.english =
+                year;
 
-        yearSelect.appendChild(option);
+            option.dataset.tamil =
+                year;
+
+            option.textContent =
+                year;
+
+            yearSelect.appendChild(
+                option
+            );
+
+        }
+    );
+
+    yearSelect.disabled =
+        years.length === 0;
+}
+
+
+// ============================================================
+// CLEAR SELECT
+// ============================================================
+
+function clearSelect(
+    select,
+    placeholder
+) {
+
+    if (!select) {
+        return;
     }
+
+    select.innerHTML = "";
+
+    const option =
+        document.createElement(
+            "option"
+        );
+
+    option.value = "";
+
+    option.disabled = true;
+
+    option.selected = true;
+
+    option.textContent =
+        placeholder;
+
+    select.appendChild(
+        option
+    );
+}
+
+
+// ============================================================
+// ADD TRANSLATED OPTION
+// ============================================================
+
+function addTranslatedOption(
+    select,
+    value,
+    tamilDictionary
+) {
+
+    const option =
+        document.createElement(
+            "option"
+        );
+
+    option.value =
+        value;
+
+    option.dataset.english =
+        value;
+
+    option.dataset.tamil =
+        tamilDictionary[value] ||
+        value;
+
+    option.textContent =
+        currentLanguage === "ta"
+            ? option.dataset.tamil
+            : option.dataset.english;
+
+    select.appendChild(
+        option
+    );
 }
 
 

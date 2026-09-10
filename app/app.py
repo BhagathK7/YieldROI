@@ -1065,6 +1065,83 @@ def get_fertilizer_recommendation(
 # INPUT VALIDATION
 # ============================================================
 
+# ============================================================
+# INPUT VALIDATION
+# ============================================================
+
+def validate_prediction_combination(
+    district,
+    crop,
+    season,
+    year
+):
+    """
+    Check whether the exact District + Crop + Season + Year
+    combination exists in the actual yield dataset.
+
+    This prevents unsupported combinations from reaching
+    the prediction model even if someone bypasses the frontend.
+    """
+
+    if YIELD_DF.empty:
+        return False
+
+    required_columns = [
+        "district",
+        "crop",
+        "season",
+        "year"
+    ]
+
+    for column in required_columns:
+        if column not in YIELD_DF.columns:
+            return False
+
+    target_district = normalize_text(district)
+    target_crop = normalize_text(crop)
+    target_season = normalize_text(season)
+
+    try:
+        target_year = int(year)
+    except (ValueError, TypeError):
+        return False
+
+    district_values = (
+        YIELD_DF["district"]
+        .fillna("")
+        .astype(str)
+        .map(normalize_text)
+    )
+
+    crop_values = (
+        YIELD_DF["crop"]
+        .fillna("")
+        .astype(str)
+        .map(normalize_text)
+    )
+
+    season_values = (
+        YIELD_DF["season"]
+        .fillna("")
+        .astype(str)
+        .map(normalize_text)
+    )
+
+    year_values = pd.to_numeric(
+        YIELD_DF["year"],
+        errors="coerce"
+    )
+
+    valid_mask = (
+        (district_values == target_district)
+        & (crop_values == target_crop)
+        & (season_values == target_season)
+        & (year_values == target_year)
+    )
+
+    return bool(valid_mask.any())
+
+
 def validate_prediction_input(data):
 
     required_fields = [
@@ -1075,9 +1152,7 @@ def validate_prediction_input(data):
         "area"
     ]
 
-
     missing = []
-
 
     for field in required_fields:
 
@@ -1087,9 +1162,7 @@ def validate_prediction_input(data):
             value is None
             or str(value).strip() == ""
         ):
-
             missing.append(field)
-
 
     if missing:
 
@@ -1098,7 +1171,6 @@ def validate_prediction_input(data):
             "Missing required fields: "
             + ", ".join(missing)
         )
-
 
     try:
 
@@ -1113,14 +1185,12 @@ def validate_prediction_input(data):
             "Year must be a valid integer."
         )
 
-
     if year < 1997 or year > 2100:
 
         return (
             False,
             "Please enter a valid year."
         )
-
 
     try:
 
@@ -1135,7 +1205,6 @@ def validate_prediction_input(data):
             "Area must be a valid number."
         )
 
-
     if area <= 0:
 
         return (
@@ -1143,6 +1212,26 @@ def validate_prediction_input(data):
             "Area must be greater than zero."
         )
 
+    # --------------------------------------------------------
+    # Exact dataset combination validation
+    # --------------------------------------------------------
+
+    if not validate_prediction_combination(
+        data["district"],
+        data["crop"],
+        data["season"],
+        year
+    ):
+
+        return (
+            False,
+            (
+                "The selected District, Crop, Season and Year "
+                "combination is not available in the trained "
+                "yield dataset. Please select a valid "
+                "combination from the available options."
+            )
+        )
 
     return True, ""
 
@@ -1158,28 +1247,28 @@ def index():
         YIELD_DF["district"]
         .dropna()
         .astype(str)
+        .str.strip()
         .unique()
         .tolist()
     )
-
 
     crops = sorted(
         YIELD_DF["crop"]
         .dropna()
         .astype(str)
+        .str.strip()
         .unique()
         .tolist()
     )
-
 
     seasons = sorted(
         YIELD_DF["season"]
         .dropna()
         .astype(str)
+        .str.strip()
         .unique()
         .tolist()
     )
-
 
     return render_template(
         "index.html",
@@ -1187,6 +1276,170 @@ def index():
         crops=crops,
         seasons=seasons
     )
+
+
+# ============================================================
+# PREDICTION OPTIONS API
+# ============================================================
+
+@app.route(
+    "/prediction-options",
+    methods=["GET"]
+)
+def prediction_options():
+
+    required_columns = [
+        "district",
+        "crop",
+        "season",
+        "year"
+    ]
+
+    # --------------------------------------------------------
+    # Check dataset structure
+    # --------------------------------------------------------
+
+    missing_columns = [
+        column
+        for column in required_columns
+        if column not in YIELD_DF.columns
+    ]
+
+    if missing_columns:
+
+        return jsonify({
+            "success": False,
+            "error": (
+                "Yield dataset is missing required columns: "
+                + ", ".join(missing_columns)
+            )
+        }), 500
+
+    # --------------------------------------------------------
+    # Prepare clean option data
+    # --------------------------------------------------------
+
+    options_df = YIELD_DF[
+        required_columns
+    ].copy()
+
+    options_df["district"] = (
+        options_df["district"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    options_df["crop"] = (
+        options_df["crop"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    options_df["season"] = (
+        options_df["season"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    options_df["year"] = pd.to_numeric(
+        options_df["year"],
+        errors="coerce"
+    )
+
+    options_df = options_df.dropna(
+        subset=[
+            "district",
+            "crop",
+            "season",
+            "year"
+        ]
+    )
+
+    options_df["year"] = (
+        options_df["year"]
+        .astype(int)
+    )
+
+    # Remove duplicate combinations
+    options_df = (
+        options_df
+        .drop_duplicates()
+        .sort_values(
+            [
+                "district",
+                "crop",
+                "season",
+                "year"
+            ]
+        )
+    )
+
+    # --------------------------------------------------------
+    # Build nested structure
+    #
+    # District
+    #   -> Crop
+    #       -> Season
+    #           -> Years
+    # --------------------------------------------------------
+
+    combinations = {}
+
+    for row in options_df.itertuples(
+        index=False
+    ):
+
+        district = row.district
+        crop = row.crop
+        season = row.season
+        year = int(row.year)
+
+        if district not in combinations:
+            combinations[district] = {}
+
+        if crop not in combinations[district]:
+            combinations[district][crop] = {}
+
+        if season not in combinations[district][crop]:
+            combinations[district][crop][season] = []
+
+        if year not in combinations[
+            district
+        ][crop][season]:
+
+            combinations[
+                district
+            ][crop][season].append(year)
+
+    # --------------------------------------------------------
+    # Sort years newest first
+    # --------------------------------------------------------
+
+    for district in combinations:
+
+        for crop in combinations[district]:
+
+            for season in combinations[
+                district
+            ][crop]:
+
+                combinations[
+                    district
+                ][crop][season] = sorted(
+                    combinations[
+                        district
+                    ][crop][season],
+                    reverse=True
+                )
+
+    return jsonify({
+        "success": True,
+        "options": combinations
+    })
+
 
 
 # ============================================================
