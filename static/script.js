@@ -4,6 +4,11 @@
 
 
 // ============================================================
+// YieldROI Frontend
+// ============================================================
+
+
+// ============================================================
 // LANGUAGE DATA
 // ============================================================
 
@@ -28,7 +33,6 @@ const translations = {
 
         networkError:
             "Unable to connect to the server. Please make sure the Flask application is running."
-
     },
 
     ta: {
@@ -61,14 +65,13 @@ const translations = {
 
         networkError:
             "சேவையகத்துடன் இணைக்க முடியவில்லை. Flask பயன்பாடு இயங்குகிறதா என்பதை உறுதிப்படுத்தவும்."
-
     }
 
 };
 
 
 // ============================================================
-// TAMIL TRANSLATIONS FOR DROPDOWN VALUES
+// TAMIL DROPDOWN TRANSLATIONS
 // ============================================================
 
 const districtTamil = {
@@ -109,7 +112,6 @@ const districtTamil = {
     "Vellore": "வேலூர்",
     "Viluppuram": "விழுப்புரம்",
     "Virudhunagar": "விருதுநகர்",
-
     "The Nilgiris": "நீலகிரி"
 };
 
@@ -130,7 +132,6 @@ const cropTamil = {
     "Cotton": "பருத்தி",
 
     "Sesamum": "எள்",
-
     "Gingelly": "எள்",
 
     "Black Gram": "உளுந்து",
@@ -148,7 +149,6 @@ const cropTamil = {
     "Jowar": "சோளம்",
 
     "Bajra": "கம்பு",
-
     "Cumbu": "கம்பு",
 
     "Chillies": "மிளகாய்",
@@ -176,7 +176,6 @@ const cropTamil = {
     "Lady's Finger": "வெண்டைக்காய்",
 
     "Cashew Nut": "முந்திரி",
-
     "Cashewnut": "முந்திரி",
 
     "Tobacco": "புகையிலை",
@@ -223,20 +222,27 @@ let currentLanguage = "en";
 
 
 // ============================================================
-// INITIALIZATION
+// PREDICTION OPTIONS
+// ============================================================
+
+let predictionOptions = {};
+
+
+// ============================================================
+// PAGE INITIALIZATION
 // ============================================================
 
 document.addEventListener(
     "DOMContentLoaded",
     async function () {
 
-        await setupPredictionOptions();
+        setupDropdownEvents();
+
+        setupForm();
 
         setupDropdownTranslations();
 
-        setupDependentDropdowns();
-
-        setupForm();
+        await loadPredictionOptions();
 
         applyLanguage();
 
@@ -245,45 +251,44 @@ document.addEventListener(
 
 
 // ============================================================
-// DYNAMIC PREDICTION OPTIONS
+// LOAD VALID OPTIONS
 // ============================================================
 
-let predictionOptions = {};
-
-
-// ============================================================
-// LOAD VALID OPTIONS FROM BACKEND
-// ============================================================
-
-async function setupPredictionOptions() {
+async function loadPredictionOptions() {
 
     try {
 
-        const response =
-            await fetch(
-                "/prediction-options"
-            );
+        const response = await fetch(
+            "/prediction-options",
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
 
-        const result =
-            await response.json();
+        const result = await response.json();
 
-        if (
-            !response.ok ||
-            !result.success
-        ) {
+        if (!response.ok || !result.success) {
 
             throw new Error(
                 result.error ||
                 "Could not load prediction options."
             );
+
         }
 
         predictionOptions =
             result.options || {};
 
-        initializeDependentDropdowns();
+        console.log(
+            "YieldROI prediction options:",
+            predictionOptions
+        );
 
-    } catch (error) {
+        resetDependentDropdowns();
+
+    }
+    catch (error) {
 
         console.error(
             "Prediction option loading failed:",
@@ -291,9 +296,7 @@ async function setupPredictionOptions() {
         );
 
         const errorBox =
-            document.getElementById(
-                "formError"
-            );
+            document.getElementById("formError");
 
         if (errorBox) {
 
@@ -303,126 +306,140 @@ async function setupPredictionOptions() {
                     : "Could not load the available prediction options.";
 
         }
+
     }
+
 }
 
 
 // ============================================================
-// INITIALIZE DROPDOWNS
+// RESET DEPENDENT DROPDOWNS
 // ============================================================
 
-function initializeDependentDropdowns() {
+function resetDependentDropdowns() {
 
-    const districtSelect =
-        document.getElementById(
-            "district"
-        );
+    const crop =
+        document.getElementById("crop");
 
-    const cropSelect =
-        document.getElementById(
-            "crop"
-        );
+    const season =
+        document.getElementById("season");
 
-    const seasonSelect =
-        document.getElementById(
-            "season"
-        );
+    const year =
+        document.getElementById("year");
 
-    const yearSelect =
-        document.getElementById(
-            "year"
-        );
 
-    if (
-        !districtSelect ||
-        !cropSelect ||
-        !seasonSelect ||
-        !yearSelect
-    ) {
-        return;
+    clearSelect(
+        crop,
+        translations.en.cropPlaceholder
+    );
+
+    clearSelect(
+        season,
+        translations.en.seasonPlaceholder
+    );
+
+    clearSelect(
+        year,
+        translations.en.yearPlaceholder
+    );
+
+
+    if (crop) {
+        crop.disabled = true;
     }
 
-    // District comes from Flask template.
+    if (season) {
+        season.disabled = true;
+    }
 
-    // Crop, Season and Year are dependent.
-    clearSelect(
-        cropSelect,
-        "Select Crop"
-    );
+    if (year) {
+        year.disabled = true;
+    }
 
-    clearSelect(
-        seasonSelect,
-        "Select Season"
-    );
-
-    clearSelect(
-        yearSelect,
-        "Select Year"
-    );
-
-    cropSelect.disabled = true;
-    seasonSelect.disabled = true;
-    yearSelect.disabled = true;
 }
 
 
 // ============================================================
-// DEPENDENT DROPDOWN EVENTS
+// DROPDOWN EVENTS
 // ============================================================
 
-function setupDependentDropdowns() {
+function setupDropdownEvents() {
 
-    const districtSelect =
-        document.getElementById(
-            "district"
-        );
+    const district =
+        document.getElementById("district");
 
-    const cropSelect =
-        document.getElementById(
-            "crop"
-        );
+    const crop =
+        document.getElementById("crop");
 
-    const seasonSelect =
-        document.getElementById(
-            "season"
-        );
+    const season =
+        document.getElementById("season");
 
-    if (
-        !districtSelect ||
-        !cropSelect ||
-        !seasonSelect
-    ) {
+
+    if (!district || !crop || !season) {
         return;
     }
 
-    districtSelect.addEventListener(
+
+    // --------------------------------------------------------
+    // District changed
+    // --------------------------------------------------------
+
+    district.addEventListener(
         "change",
         function () {
+
+            const selectedDistrict =
+                district.value.trim();
+
+            console.log(
+                "District selected:",
+                selectedDistrict
+            );
+
+
+            // Reset lower levels
+
+            clearSelect(
+                crop,
+                translations.en.cropPlaceholder
+            );
+
+            clearSelect(
+                season,
+                translations.en.seasonPlaceholder
+            );
+
+            clearSelect(
+                document.getElementById("year"),
+                translations.en.yearPlaceholder
+            );
+
+
+            crop.disabled = true;
+
+            season.disabled = true;
+
+            const year =
+                document.getElementById("year");
+
+            if (year) {
+                year.disabled = true;
+            }
+
+
+            // No district selected
+
+            if (!selectedDistrict) {
+                applyLanguage();
+                return;
+            }
+
+
+            // Populate crops
 
             populateCrops(
-                districtSelect.value
+                selectedDistrict
             );
-
-            clearSelect(
-                seasonSelect,
-                "Select Season"
-            );
-
-            clearSelect(
-                document.getElementById("year"),
-                "Select Year"
-            );
-
-            seasonSelect.disabled = true;
-
-            const yearSelect =
-                document.getElementById(
-                    "year"
-                );
-
-            if (yearSelect) {
-                yearSelect.disabled = true;
-            }
 
             applyLanguage();
 
@@ -430,28 +447,57 @@ function setupDependentDropdowns() {
     );
 
 
-    cropSelect.addEventListener(
+    // --------------------------------------------------------
+    // Crop changed
+    // --------------------------------------------------------
+
+    crop.addEventListener(
         "change",
         function () {
+
+            const selectedDistrict =
+                district.value.trim();
+
+            const selectedCrop =
+                crop.value.trim();
+
+
+            clearSelect(
+                season,
+                translations.en.seasonPlaceholder
+            );
+
+            clearSelect(
+                document.getElementById("year"),
+                translations.en.yearPlaceholder
+            );
+
+
+            season.disabled = true;
+
+            const year =
+                document.getElementById("year");
+
+            if (year) {
+                year.disabled = true;
+            }
+
+
+            if (
+                !selectedDistrict ||
+                !selectedCrop
+            ) {
+
+                applyLanguage();
+
+                return;
+            }
+
 
             populateSeasons(
-                districtSelect.value,
-                cropSelect.value
+                selectedDistrict,
+                selectedCrop
             );
-
-            clearSelect(
-                document.getElementById("year"),
-                "Select Year"
-            );
-
-            const yearSelect =
-                document.getElementById(
-                    "year"
-                );
-
-            if (yearSelect) {
-                yearSelect.disabled = true;
-            }
 
             applyLanguage();
 
@@ -459,20 +505,61 @@ function setupDependentDropdowns() {
     );
 
 
-    seasonSelect.addEventListener(
+    // --------------------------------------------------------
+    // Season changed
+    // --------------------------------------------------------
+
+    season.addEventListener(
         "change",
         function () {
 
+            const selectedDistrict =
+                district.value.trim();
+
+            const selectedCrop =
+                crop.value.trim();
+
+            const selectedSeason =
+                season.value.trim();
+
+
+            clearSelect(
+                document.getElementById("year"),
+                translations.en.yearPlaceholder
+            );
+
+
+            const year =
+                document.getElementById("year");
+
+            if (year) {
+                year.disabled = true;
+            }
+
+
+            if (
+                !selectedDistrict ||
+                !selectedCrop ||
+                !selectedSeason
+            ) {
+
+                applyLanguage();
+
+                return;
+            }
+
+
             populateYears(
-                districtSelect.value,
-                cropSelect.value,
-                seasonSelect.value
+                selectedDistrict,
+                selectedCrop,
+                selectedSeason
             );
 
             applyLanguage();
 
         }
     );
+
 }
 
 
@@ -480,45 +567,106 @@ function setupDependentDropdowns() {
 // POPULATE CROPS
 // ============================================================
 
-function populateCrops(
-    district
-) {
+function populateCrops(district) {
 
     const cropSelect =
-        document.getElementById(
-            "crop"
-        );
+        document.getElementById("crop");
+
 
     if (!cropSelect) {
         return;
     }
 
+
     clearSelect(
         cropSelect,
-        "Select Crop"
+        translations.en.cropPlaceholder
     );
 
-    const districtData =
+
+    // --------------------------------------------------------
+    // Find district
+    // --------------------------------------------------------
+
+    let districtData =
         predictionOptions[district];
+
+
+    // --------------------------------------------------------
+    // Fallback: case-insensitive lookup
+    // --------------------------------------------------------
+
+    if (!districtData) {
+
+        const districtKey =
+            Object.keys(predictionOptions)
+                .find(
+                    function (key) {
+
+                        return key.trim().toLowerCase()
+                            === district.trim().toLowerCase();
+
+                    }
+                );
+
+        if (districtKey) {
+
+            districtData =
+                predictionOptions[districtKey];
+
+        }
+
+    }
+
+
+    // --------------------------------------------------------
+    // No crops
+    // --------------------------------------------------------
 
     if (
         !districtData ||
-        Object.keys(districtData).length === 0
+        typeof districtData !== "object"
     ) {
+
+        console.warn(
+            "No crop data found for district:",
+            district
+        );
 
         cropSelect.disabled = true;
 
         return;
     }
 
+
     const crops =
-        Object.keys(
-            districtData
-        ).sort(
-            function (a, b) {
-                return a.localeCompare(b);
-            }
-        );
+        Object.keys(districtData)
+            .filter(
+                function (crop) {
+
+                    return crop &&
+                        crop.trim() !== "";
+
+                }
+            )
+            .sort(
+                function (a, b) {
+
+                    return a.localeCompare(
+                        b
+                    );
+
+                }
+            );
+
+
+    console.log(
+        "Crops for",
+        district,
+        ":",
+        crops
+    );
+
 
     crops.forEach(
         function (crop) {
@@ -532,8 +680,10 @@ function populateCrops(
         }
     );
 
+
     cropSelect.disabled =
         crops.length === 0;
+
 }
 
 
@@ -547,21 +697,48 @@ function populateSeasons(
 ) {
 
     const seasonSelect =
-        document.getElementById(
-            "season"
-        );
+        document.getElementById("season");
+
 
     if (!seasonSelect) {
         return;
     }
 
+
     clearSelect(
         seasonSelect,
-        "Select Season"
+        translations.en.seasonPlaceholder
     );
 
-    const districtData =
+
+    let districtData =
         predictionOptions[district];
+
+
+    // Case-insensitive district fallback
+
+    if (!districtData) {
+
+        const districtKey =
+            Object.keys(predictionOptions)
+                .find(
+                    function (key) {
+
+                        return key.trim().toLowerCase()
+                            === district.trim().toLowerCase();
+
+                    }
+                );
+
+        if (districtKey) {
+
+            districtData =
+                predictionOptions[districtKey];
+
+        }
+
+    }
+
 
     if (!districtData) {
 
@@ -570,24 +747,83 @@ function populateSeasons(
         return;
     }
 
-    const cropData =
+
+    // --------------------------------------------------------
+    // Find crop
+    // --------------------------------------------------------
+
+    let cropData =
         districtData[crop];
 
+
+    // Case-insensitive crop fallback
+
     if (!cropData) {
+
+        const cropKey =
+            Object.keys(districtData)
+                .find(
+                    function (key) {
+
+                        return key.trim().toLowerCase()
+                            === crop.trim().toLowerCase();
+
+                    }
+                );
+
+        if (cropKey) {
+
+            cropData =
+                districtData[cropKey];
+
+        }
+
+    }
+
+
+    if (!cropData) {
+
+        console.warn(
+            "No season data found for:",
+            district,
+            crop
+        );
 
         seasonSelect.disabled = true;
 
         return;
     }
 
+
     const seasons =
-        Object.keys(
-            cropData
-        ).sort(
-            function (a, b) {
-                return a.localeCompare(b);
-            }
-        );
+        Object.keys(cropData)
+            .filter(
+                function (season) {
+
+                    return season &&
+                        season.trim() !== "";
+
+                }
+            )
+            .sort(
+                function (a, b) {
+
+                    return a.localeCompare(
+                        b
+                    );
+
+                }
+            );
+
+
+    console.log(
+        "Seasons for",
+        district,
+        crop,
+        ":",
+        seasons
+    );
+
 
     seasons.forEach(
         function (season) {
@@ -601,8 +837,10 @@ function populateSeasons(
         }
     );
 
+
     seasonSelect.disabled =
         seasons.length === 0;
+
 }
 
 
@@ -617,30 +855,160 @@ function populateYears(
 ) {
 
     const yearSelect =
-        document.getElementById(
-            "year"
-        );
+        document.getElementById("year");
+
 
     if (!yearSelect) {
         return;
     }
 
+
     clearSelect(
         yearSelect,
-        "Select Year"
+        translations.en.yearPlaceholder
     );
 
-    const years =
-        predictionOptions
-            ?.[
-                district
-            ]
-            ?.[
-                crop
-            ]
-            ?.[
-                season
-            ] || [];
+
+    let districtData =
+        predictionOptions[district];
+
+
+    // Case-insensitive district fallback
+
+    if (!districtData) {
+
+        const districtKey =
+            Object.keys(predictionOptions)
+                .find(
+                    function (key) {
+
+                        return key.trim().toLowerCase()
+                            === district.trim().toLowerCase();
+
+                    }
+                );
+
+        if (districtKey) {
+
+            districtData =
+                predictionOptions[districtKey];
+
+        }
+
+    }
+
+
+    if (!districtData) {
+
+        yearSelect.disabled = true;
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Find crop
+    // --------------------------------------------------------
+
+    let cropData =
+        districtData[crop];
+
+
+    if (!cropData) {
+
+        const cropKey =
+            Object.keys(districtData)
+                .find(
+                    function (key) {
+
+                        return key.trim().toLowerCase()
+                            === crop.trim().toLowerCase();
+
+                    }
+                );
+
+        if (cropKey) {
+
+            cropData =
+                districtData[cropKey];
+
+        }
+
+    }
+
+
+    if (!cropData) {
+
+        yearSelect.disabled = true;
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Find season
+    // --------------------------------------------------------
+
+    let years =
+        cropData[season];
+
+
+    if (!years) {
+
+        const seasonKey =
+            Object.keys(cropData)
+                .find(
+                    function (key) {
+
+                        return key.trim().toLowerCase()
+                            === season.trim().toLowerCase();
+
+                    }
+                );
+
+        if (seasonKey) {
+
+            years =
+                cropData[seasonKey];
+
+        }
+
+    }
+
+
+    if (!Array.isArray(years)) {
+
+        yearSelect.disabled = true;
+
+        return;
+    }
+
+
+    // --------------------------------------------------------
+    // Sort newest first
+    // --------------------------------------------------------
+
+    years =
+        [...new Set(years)]
+            .sort(
+                function (a, b) {
+
+                    return Number(b) -
+                        Number(a);
+
+                }
+            );
+
+
+    console.log(
+        "Years for",
+        district,
+        crop,
+        season,
+        ":",
+        years
+    );
+
 
     years.forEach(
         function (year) {
@@ -651,16 +1019,16 @@ function populateYears(
                 );
 
             option.value =
-                year;
+                String(year);
 
             option.dataset.english =
-                year;
+                String(year);
 
             option.dataset.tamil =
-                year;
+                String(year);
 
             option.textContent =
-                year;
+                String(year);
 
             yearSelect.appendChild(
                 option
@@ -669,8 +1037,10 @@ function populateYears(
         }
     );
 
+
     yearSelect.disabled =
         years.length === 0;
+
 }
 
 
@@ -687,12 +1057,15 @@ function clearSelect(
         return;
     }
 
+
     select.innerHTML = "";
+
 
     const option =
         document.createElement(
             "option"
         );
+
 
     option.value = "";
 
@@ -703,9 +1076,11 @@ function clearSelect(
     option.textContent =
         placeholder;
 
+
     select.appendChild(
         option
     );
+
 }
 
 
@@ -716,13 +1091,19 @@ function clearSelect(
 function addTranslatedOption(
     select,
     value,
-    tamilDictionary
+    dictionary
 ) {
+
+    if (!select) {
+        return;
+    }
+
 
     const option =
         document.createElement(
             "option"
         );
+
 
     option.value =
         value;
@@ -731,17 +1112,20 @@ function addTranslatedOption(
         value;
 
     option.dataset.tamil =
-        tamilDictionary[value] ||
+        dictionary[value] ||
         value;
+
 
     option.textContent =
         currentLanguage === "ta"
             ? option.dataset.tamil
             : option.dataset.english;
 
+
     select.appendChild(
         option
     );
+
 }
 
 
@@ -771,17 +1155,20 @@ function setupDropdownTranslations() {
 }
 
 
-// ------------------------------------------------------------
-// Translate normal select
-// ------------------------------------------------------------
+// ============================================================
+// TRANSLATE SELECT
+// ============================================================
 
 function translateSelect(
     selectId,
-    tamilDictionary
+    dictionary
 ) {
 
     const select =
-        document.getElementById(selectId);
+        document.getElementById(
+            selectId
+        );
+
 
     if (!select) {
         return;
@@ -789,50 +1176,9 @@ function translateSelect(
 
 
     const options =
-        select.querySelectorAll("option");
-
-
-    options.forEach(
-        function (option) {
-
-            const value =
-                option.value;
-
-
-            if (!value) {
-                return;
-            }
-
-
-            option.dataset.english =
-                value;
-
-
-            option.dataset.tamil =
-                tamilDictionary[value] ||
-                value;
-
-        }
-    );
-}
-
-
-// ------------------------------------------------------------
-// Translate years
-// ------------------------------------------------------------
-
-function translateYearSelect() {
-
-    const select =
-        document.getElementById("year");
-
-    if (!select) {
-        return;
-    }
-
-
-    const options =
-        select.querySelectorAll("option");
+        select.querySelectorAll(
+            "option"
+        );
 
 
     options.forEach(
@@ -842,13 +1188,60 @@ function translateYearSelect() {
                 return;
             }
 
+
+            option.dataset.english =
+                option.value;
+
+            option.dataset.tamil =
+                dictionary[option.value] ||
+                option.value;
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// TRANSLATE YEARS
+// ============================================================
+
+function translateYearSelect() {
+
+    const select =
+        document.getElementById(
+            "year"
+        );
+
+
+    if (!select) {
+        return;
+    }
+
+
+    const options =
+        select.querySelectorAll(
+            "option"
+        );
+
+
+    options.forEach(
+        function (option) {
+
+            if (!option.value) {
+                return;
+            }
+
+
             option.dataset.english =
                 option.value;
 
             option.dataset.tamil =
                 option.value;
+
         }
     );
+
 }
 
 
@@ -888,43 +1281,35 @@ function applyLanguage() {
 
 
     // --------------------------------------------------------
-    // Show/hide bilingual elements
+    // English / Tamil page content
     // --------------------------------------------------------
 
-    const englishElements =
-        document.querySelectorAll(
-            ".language-en"
+    document
+        .querySelectorAll(".language-en")
+        .forEach(
+            function (element) {
+
+                element.style.display =
+                    currentLanguage === "en"
+                        ? ""
+                        : "none";
+
+            }
         );
 
 
-    const tamilElements =
-        document.querySelectorAll(
-            ".language-ta"
+    document
+        .querySelectorAll(".language-ta")
+        .forEach(
+            function (element) {
+
+                element.style.display =
+                    currentLanguage === "ta"
+                        ? ""
+                        : "none";
+
+            }
         );
-
-
-    englishElements.forEach(
-        function (element) {
-
-            element.style.display =
-                currentLanguage === "en"
-                    ? ""
-                    : "none";
-
-        }
-    );
-
-
-    tamilElements.forEach(
-        function (element) {
-
-            element.style.display =
-                currentLanguage === "ta"
-                    ? ""
-                    : "none";
-
-        }
-    );
 
 
     // --------------------------------------------------------
@@ -948,11 +1333,13 @@ function applyLanguage() {
 
 
     // --------------------------------------------------------
-    // Placeholders
+    // Area placeholder
     // --------------------------------------------------------
 
     const area =
-        document.getElementById("area");
+        document.getElementById(
+            "area"
+        );
 
 
     if (area) {
@@ -1002,30 +1389,22 @@ function applyLanguage() {
 
 
     // --------------------------------------------------------
-    // Dropdown values
+    // Select values
     // --------------------------------------------------------
 
-    updateSelectOptions(
-        "district"
-    );
+    updateSelectOptions("district");
 
-    updateSelectOptions(
-        "crop"
-    );
+    updateSelectOptions("crop");
 
-    updateSelectOptions(
-        "season"
-    );
+    updateSelectOptions("season");
 
-    updateSelectOptions(
-        "year"
-    );
+    updateSelectOptions("year");
 
 }
 
 
 // ============================================================
-// SELECT PLACEHOLDER
+// UPDATE SELECT PLACEHOLDER
 // ============================================================
 
 function updateSelectPlaceholder(
@@ -1034,7 +1413,10 @@ function updateSelectPlaceholder(
 ) {
 
     const select =
-        document.getElementById(selectId);
+        document.getElementById(
+            selectId
+        );
+
 
     if (!select) {
         return;
@@ -1053,11 +1435,12 @@ function updateSelectPlaceholder(
             placeholder;
 
     }
+
 }
 
 
 // ============================================================
-// SELECT OPTION LANGUAGE
+// UPDATE SELECT OPTIONS
 // ============================================================
 
 function updateSelectOptions(
@@ -1065,7 +1448,10 @@ function updateSelectOptions(
 ) {
 
     const select =
-        document.getElementById(selectId);
+        document.getElementById(
+            selectId
+        );
+
 
     if (!select) {
         return;
@@ -1094,7 +1480,8 @@ function updateSelectOptions(
                     option.dataset.tamil ||
                     option.value;
 
-            } else {
+            }
+            else {
 
                 option.textContent =
                     option.dataset.english ||
@@ -1109,7 +1496,7 @@ function updateSelectOptions(
 
 
 // ============================================================
-// SCROLL TO FORM
+// SCROLL TO PREDICTION
 // ============================================================
 
 function scrollToPrediction() {
@@ -1134,7 +1521,7 @@ function scrollToPrediction() {
 
 
 // ============================================================
-// FORM
+// FORM SETUP
 // ============================================================
 
 function setupForm() {
@@ -1156,7 +1543,9 @@ function setupForm() {
 
             event.preventDefault();
 
-            await submitPrediction(form);
+            await submitPrediction(
+                form
+            );
 
         }
     );
@@ -1184,6 +1573,11 @@ async function submitPrediction(
         );
 
 
+    if (!button || !errorBox) {
+        return;
+    }
+
+
     errorBox.textContent = "";
 
 
@@ -1194,19 +1588,19 @@ async function submitPrediction(
     const district =
         document.getElementById(
             "district"
-        ).value;
+        ).value.trim();
 
 
     const crop =
         document.getElementById(
             "crop"
-        ).value;
+        ).value.trim();
 
 
     const season =
         document.getElementById(
             "season"
-        ).value;
+        ).value.trim();
 
 
     const year =
@@ -1267,7 +1661,7 @@ async function submitPrediction(
 
 
     // --------------------------------------------------------
-    // Data
+    // Payload
     // --------------------------------------------------------
 
     const payload = {
@@ -1299,7 +1693,9 @@ async function submitPrediction(
                     },
 
                     body:
-                        JSON.stringify(payload)
+                        JSON.stringify(
+                            payload
+                        )
                 }
             );
 
@@ -1333,7 +1729,7 @@ async function submitPrediction(
 
 
         // ----------------------------------------------------
-        // Store language for result page
+        // Store language
         // ----------------------------------------------------
 
         sessionStorage.setItem(
@@ -1343,20 +1739,23 @@ async function submitPrediction(
 
 
         // ----------------------------------------------------
-        // Open result page
+        // Redirect
         // ----------------------------------------------------
 
         const encoded =
             encodeURIComponent(
-                JSON.stringify(result)
+                JSON.stringify(
+                    result
+                )
             );
 
 
         window.location.href =
-            "/result?data=" + encoded;
+            "/result?data=" +
+            encoded;
 
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
             "Prediction error:",
@@ -1370,8 +1769,8 @@ async function submitPrediction(
                 currentLanguage
             ].networkError;
 
-
-    } finally {
+    }
+    finally {
 
         button.classList.remove(
             "loading"

@@ -1046,7 +1046,6 @@ def get_fertilizer_recommendation(
             )
         )
 
-
         return normalized
 
 
