@@ -1348,24 +1348,36 @@ def prediction_options():
         errors="coerce"
     )
 
-    options_df = options_df.dropna(
-        subset=[
-            "district",
-            "crop",
-            "season",
-            "year"
-        ]
-    )
+    # --------------------------------------------------------
+    # Remove incomplete rows
+    # --------------------------------------------------------
+
+    options_df = options_df[
+        (options_df["district"] != "") &
+        (options_df["crop"] != "") &
+        (options_df["season"] != "") &
+        (options_df["year"].notna())
+    ].copy()
 
     options_df["year"] = (
         options_df["year"]
         .astype(int)
     )
 
+    # --------------------------------------------------------
     # Remove duplicate combinations
+    # --------------------------------------------------------
+
     options_df = (
         options_df
-        .drop_duplicates()
+        .drop_duplicates(
+            subset=[
+                "district",
+                "crop",
+                "season",
+                "year"
+            ]
+        )
         .sort_values(
             [
                 "district",
@@ -1377,24 +1389,43 @@ def prediction_options():
     )
 
     # --------------------------------------------------------
-    # Build nested structure
+    # Create explicit valid records
+    #
+    # Every record represents one VALID combination:
+    #
+    # District + Crop + Season + Year
+    # --------------------------------------------------------
+
+    records = []
+
+    for row in options_df.itertuples(index=False):
+
+        records.append({
+            "district": row.district,
+            "crop": row.crop,
+            "season": row.season,
+            "year": int(row.year)
+        })
+
+    # --------------------------------------------------------
+    # Also keep the nested structure
     #
     # District
     #   -> Crop
     #       -> Season
     #           -> Years
+    #
+    # This keeps backward compatibility.
     # --------------------------------------------------------
 
     combinations = {}
 
-    for row in options_df.itertuples(
-        index=False
-    ):
+    for record in records:
 
-        district = row.district
-        crop = row.crop
-        season = row.season
-        year = int(row.year)
+        district = record["district"]
+        crop = record["crop"]
+        season = record["season"]
+        year = record["year"]
 
         if district not in combinations:
             combinations[district] = {}
@@ -1434,9 +1465,14 @@ def prediction_options():
                     reverse=True
                 )
 
+    # --------------------------------------------------------
+    # Return both formats
+    # --------------------------------------------------------
+
     return jsonify({
         "success": True,
-        "options": combinations
+        "options": combinations,
+        "records": records
     })
 
 
